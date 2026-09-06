@@ -22,7 +22,9 @@ flowchart LR
 
 ![The medallion lakehouse in Databricks (Unity Catalog, 1_bronze/2_silver/3_gold)](docs/lakehouse-catalog.png)
 
+
 ![Auto-generated data dictionary — 80 columns documented automatically via Claude](docs/data-dictionary-populated.png)
+
 
 - [`mcp_server/`](mcp_server) — MCP server exposing schema inspection and LIMIT-guarded query tools over the lakehouse.
 - [`subagents/`](subagents) — Reads table/column metadata via MCP, drafts descriptions with Claude, writes them back to `data_dictionary`.
