@@ -68,7 +68,7 @@ python -m hooks.detect_schema_change
 
 ## Demo
 
-[DEMO GIF HERE]
+<video src="docs/medallion-rag-chatbot-demo.mov" controls width="700"></video>
 
 ## Tech stack
 
