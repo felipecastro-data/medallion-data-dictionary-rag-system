@@ -68,7 +68,7 @@ python -m hooks.detect_schema_change
 
 ## Demo
 
-<video src="https://github.com/felipecastro-data/medallion-data-dictionary-rag-system/releases/download/Demo_assets/medallion-rag-chatbot-demo.mov" controls width="700"></video>
+[▶️ Watch the demo (1 min)](https://github.com/felipecastro-data/medallion-data-dictionary-rag-system/releases/download/Demo_assets/medallion-rag-chatbot-demo.mov)
 
 ## Tech stack
 
