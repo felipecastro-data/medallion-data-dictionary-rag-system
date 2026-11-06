@@ -69,6 +69,21 @@ def test_only_new_and_changed_rows_are_embedded_and_stale_rows_removed(
     assert indexed_ids() == ["orders.added", "orders.edited", "orders.kept"]
 
 
+def test_changing_the_embedding_model_embeds_every_row_again(
+    voyage: MagicMock, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Vectors from two models must not sit side by side in one index."""
+    rows = [row("order_id", "Order key."), row("status", "Order status.")]
+    index(rows, monkeypatch)
+    voyage.embed.reset_mock()
+    monkeypatch.setattr(build_index, "VOYAGE_MODEL", "other-model")
+
+    index(rows, monkeypatch)
+
+    assert voyage.embed.call_args.args[0] == ["orders.order_id: Order key.", "orders.status: Order status."]
+    assert voyage.embed.call_args.kwargs["model"] == "other-model"
+
+
 def test_lineage_updates_without_embedding_again(voyage: MagicMock, monkeypatch: pytest.MonkeyPatch) -> None:
     """A new upstream column reaches the index without a paid re-embed of the row."""
     rows = [row("clerk", "Clerk.")]

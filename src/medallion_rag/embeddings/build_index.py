@@ -86,16 +86,27 @@ def run() -> None:
             "column_name": row["column_name"],
             "description": row["description"],
             "derived_from": ", ".join(lineage.get((row["table_name"], row["column_name"]), [])),
+            "embedding_model": VOYAGE_MODEL,
         }
         for entry_id, row in rows_by_id.items()
     }
 
     chroma_client = chromadb.PersistentClient(path=CHROMA_DB_PATH)
     collection = chroma_client.get_or_create_collection(name=COLLECTION_NAME)
-    existing = collection.get(include=["documents"])
-    indexed = dict(zip(existing["ids"], existing["documents"], strict=True))
+    existing = collection.get(include=["documents", "metadatas"])
+    indexed = {
+        entry_id: (document, (metadata or {}).get("embedding_model"))
+        for entry_id, document, metadata in zip(
+            existing["ids"], existing["documents"], existing["metadatas"], strict=True
+        )
+    }
 
-    changed_ids = [entry_id for entry_id, document in documents.items() if indexed.get(entry_id) != document]
+    # Vectors from different models can't be compared, so a model change re-embeds every row.
+    changed_ids = [
+        entry_id
+        for entry_id, document in documents.items()
+        if indexed.get(entry_id) != (document, VOYAGE_MODEL)
+    ]
     stale_ids = [entry_id for entry_id in indexed if entry_id not in documents]
 
     if changed_ids:
