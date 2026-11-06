@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1116 200" width="1116" height="200" role="img" aria-label="Evaluation scorecard: Expected column ranked first 85%; Expected column in top 5 100%; Answers met their criterion 32/32; Added an unsupported detail 4/32; Median answer latency 1.86 s; Cost per question $0.0012" font-family="system-ui, -apple-system, &quot;Segoe UI&quot;, sans-serif">
+<title>Evaluation scorecard: Expected column ranked first 85%; Expected column in top 5 100%; Answers met their criterion 32/32; Added an unsupported detail 4/32; Median answer latency 1.86 s; Cost per question $0.0012</title><style>
+  .surface { fill: #fcfcfb; } .card { fill: #ffffff; stroke: rgba(11,11,11,0.10); }
+  .ink { fill: #0b0b0b; } .ink2 { fill: #52514e; } .grid { stroke: #e1e0d9; } .base { stroke: #898781; }
+  .first { fill: #1c5cab; } .top5 { fill: #86b6ef; } .clean { fill: #2a78d6; } .added { fill: #eb6834; }
+  .on-clean { fill: #ffffff; } .on-added { fill: #0b0b0b; }
+  @media (prefers-color-scheme: dark) {
+    .surface { fill: #1a1a19; } .card { fill: #222221; stroke: rgba(255,255,255,0.10); }
+    .ink { fill: #f0efec; } .ink2 { fill: #c3c2b7; } .grid { stroke: #2c2c2a; } .base { stroke: #898781; }
+    .first { fill: #86b6ef; } .top5 { fill: #256abf; } .clean { fill: #3987e5; } .added { fill: #d95926; }
+  }
+</style>
+<rect class="surface" width="1116" height="200" rx="12"/>
+<text x="24" y="36" class="ink" font-size="17" text-anchor="start" font-weight="600">Evaluation scorecard · 32 fixed questions, measured 2026-11-06</text>
+<rect class="card" x="24" y="60" width="168" height="116" rx="10"/>
+<text x="38" y="86" class="ink2" font-size="12" text-anchor="start" font-weight="400">Expected column</text>
+<text x="38" y="102" class="ink2" font-size="12" text-anchor="start" font-weight="400">ranked first</text>
+<text x="38" y="138" class="ink" font-size="30" text-anchor="start" font-weight="600">85%</text>
+<text x="38" y="160" class="ink2" font-size="10.5" text-anchor="start" font-weight="400">22 of 26 questions</text>
+<rect class="card" x="204" y="60" width="168" height="116" rx="10"/>
+<text x="218" y="86" class="ink2" font-size="12" text-anchor="start" font-weight="400">Expected column in top 5</text>
+<text x="218" y="138" class="ink" font-size="30" text-anchor="start" font-weight="600">100%</text>
+<text x="218" y="160" class="ink2" font-size="10.5" text-anchor="start" font-weight="400">26 of 26 questions</text>
+<rect class="card" x="384" y="60" width="168" height="116" rx="10"/>
+<text x="398" y="86" class="ink2" font-size="12" text-anchor="start" font-weight="400">Answers met</text>
+<text x="398" y="102" class="ink2" font-size="12" text-anchor="start" font-weight="400">their criterion</text>
+<text x="398" y="138" class="ink" font-size="30" text-anchor="start" font-weight="600">32/32</text>
+<text x="398" y="160" class="ink2" font-size="10.5" text-anchor="start" font-weight="400">graded against criteria</text>
+<rect class="card" x="564" y="60" width="168" height="116" rx="10"/>
+<text x="578" y="86" class="ink2" font-size="12" text-anchor="start" font-weight="400">Added an</text>
+<text x="578" y="102" class="ink2" font-size="12" text-anchor="start" font-weight="400">unsupported detail</text>
+<text x="578" y="138" class="ink" font-size="30" text-anchor="start" font-weight="600">4/32</text>
+<text x="578" y="160" class="ink2" font-size="10.5" text-anchor="start" font-weight="400">known limitation, was 10/32</text>
+<rect class="card" x="744" y="60" width="168" height="116" rx="10"/>
+<text x="758" y="86" class="ink2" font-size="12" text-anchor="start" font-weight="400">Median answer latency</text>
+<text x="758" y="138" class="ink" font-size="30" text-anchor="start" font-weight="600">1.86 s</text>
+<text x="758" y="160" class="ink2" font-size="10.5" text-anchor="start" font-weight="400">slowest 2.69 s</text>
+<rect class="card" x="924" y="60" width="168" height="116" rx="10"/>
+<text x="938" y="86" class="ink2" font-size="12" text-anchor="start" font-weight="400">Cost per question</text>
+<text x="938" y="138" class="ink" font-size="30" text-anchor="start" font-weight="600">$0.0012</text>
+<text x="938" y="160" class="ink2" font-size="10.5" text-anchor="start" font-weight="400">at list prices</text>
+</svg>

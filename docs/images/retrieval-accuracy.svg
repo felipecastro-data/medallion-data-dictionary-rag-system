@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1116 356" width="1116" height="356" role="img" aria-label="Retrieval accuracy: One concept: 14 of 16 ranked first, 16 in top 5; Same concept in two places: 4 of 5 ranked first, 5 in top 5; Lineage: 4 of 5 ranked first, 5 in top 5; All questions: 22 of 26 ranked first, 26 in top 5" font-family="system-ui, -apple-system, &quot;Segoe UI&quot;, sans-serif">
+<title>Retrieval accuracy: One concept: 14 of 16 ranked first, 16 in top 5; Same concept in two places: 4 of 5 ranked first, 5 in top 5; Lineage: 4 of 5 ranked first, 5 in top 5; All questions: 22 of 26 ranked first, 26 in top 5</title><style>
+  .surface { fill: #fcfcfb; } .card { fill: #ffffff; stroke: rgba(11,11,11,0.10); }
+  .ink { fill: #0b0b0b; } .ink2 { fill: #52514e; } .grid { stroke: #e1e0d9; } .base { stroke: #898781; }
+  .first { fill: #1c5cab; } .top5 { fill: #86b6ef; } .clean { fill: #2a78d6; } .added { fill: #eb6834; }
+  .on-clean { fill: #ffffff; } .on-added { fill: #0b0b0b; }
+  @media (prefers-color-scheme: dark) {
+    .surface { fill: #1a1a19; } .card { fill: #222221; stroke: rgba(255,255,255,0.10); }
+    .ink { fill: #f0efec; } .ink2 { fill: #c3c2b7; } .grid { stroke: #2c2c2a; } .base { stroke: #898781; }
+    .first { fill: #86b6ef; } .top5 { fill: #256abf; } .clean { fill: #3987e5; } .added { fill: #d95926; }
+  }
+</style>
+<rect class="surface" width="1116" height="356" rx="12"/>
+<text x="24" y="36" class="ink" font-size="17" text-anchor="start" font-weight="600">Retrieval accuracy by question type</text>
+<rect class="first" x="24" y="52" width="12" height="12" rx="2"/>
+<text x="42" y="63" class="ink2" font-size="12" text-anchor="start" font-weight="400">Expected column ranked first</text>
+<rect class="top5" x="236" y="52" width="12" height="12" rx="2"/>
+<text x="254" y="63" class="ink2" font-size="12" text-anchor="start" font-weight="400">Expected column in top 5</text>
+<line class="base" x1="250" x2="250" y1="88" y2="320"/>
+<text x="250" y="338" class="ink2" font-size="11" text-anchor="middle" font-weight="400">0%</text>
+<line class="grid" x1="437.5" x2="437.5" y1="88" y2="320"/>
+<text x="437.5" y="338" class="ink2" font-size="11" text-anchor="middle" font-weight="400">25%</text>
+<line class="grid" x1="625" x2="625" y1="88" y2="320"/>
+<text x="625" y="338" class="ink2" font-size="11" text-anchor="middle" font-weight="400">50%</text>
+<line class="grid" x1="812.5" x2="812.5" y1="88" y2="320"/>
+<text x="812.5" y="338" class="ink2" font-size="11" text-anchor="middle" font-weight="400">75%</text>
+<line class="grid" x1="1000" x2="1000" y1="88" y2="320"/>
+<text x="1000" y="338" class="ink2" font-size="11" text-anchor="middle" font-weight="400">100%</text>
+<text x="24" y="119" class="ink" font-size="13" text-anchor="start" font-weight="400">One concept</text>
+<path class="first" d="M250 96 H902.25 a4 4 0 0 1 4 4 V110 a4 4 0 0 1 -4 4 H250 Z"/>
+<text x="914.25" y="110" class="ink2" font-size="12" text-anchor="start" font-weight="400">14 of 16</text>
+<path class="top5" d="M250 116 H996 a4 4 0 0 1 4 4 V130 a4 4 0 0 1 -4 4 H250 Z"/>
+<text x="1008" y="130" class="ink2" font-size="12" text-anchor="start" font-weight="400">16 of 16</text>
+<text x="24" y="177" class="ink" font-size="13" text-anchor="start" font-weight="400">Same concept in two places</text>
+<path class="first" d="M250 154 H846 a4 4 0 0 1 4 4 V168 a4 4 0 0 1 -4 4 H250 Z"/>
+<text x="858" y="168" class="ink2" font-size="12" text-anchor="start" font-weight="400">4 of 5</text>
+<path class="top5" d="M250 174 H996 a4 4 0 0 1 4 4 V188 a4 4 0 0 1 -4 4 H250 Z"/>
+<text x="1008" y="188" class="ink2" font-size="12" text-anchor="start" font-weight="400">5 of 5</text>
+<text x="24" y="235" class="ink" font-size="13" text-anchor="start" font-weight="400">Lineage</text>
+<path class="first" d="M250 212 H846 a4 4 0 0 1 4 4 V226 a4 4 0 0 1 -4 4 H250 Z"/>
+<text x="858" y="226" class="ink2" font-size="12" text-anchor="start" font-weight="400">4 of 5</text>
+<path class="top5" d="M250 232 H996 a4 4 0 0 1 4 4 V246 a4 4 0 0 1 -4 4 H250 Z"/>
+<text x="1008" y="246" class="ink2" font-size="12" text-anchor="start" font-weight="400">5 of 5</text>
+<text x="24" y="293" class="ink" font-size="13" text-anchor="start" font-weight="600">All questions</text>
+<path class="first" d="M250 270 H880.615 a4 4 0 0 1 4 4 V284 a4 4 0 0 1 -4 4 H250 Z"/>
+<text x="892.615" y="284" class="ink2" font-size="12" text-anchor="start" font-weight="400">22 of 26</text>
+<path class="top5" d="M250 290 H996 a4 4 0 0 1 4 4 V304 a4 4 0 0 1 -4 4 H250 Z"/>
+<text x="1008" y="304" class="ink2" font-size="12" text-anchor="start" font-weight="400">26 of 26</text>
+</svg>

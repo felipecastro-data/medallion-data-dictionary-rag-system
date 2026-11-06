@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1116 196" width="1116" height="196" role="img" aria-label="Before the stricter prompt: 10 of 32 answers added an unsupported detail; After the stricter prompt: 4 of 32 answers added an unsupported detail" font-family="system-ui, -apple-system, &quot;Segoe UI&quot;, sans-serif">
+<title>Before the stricter prompt: 10 of 32 answers added an unsupported detail; After the stricter prompt: 4 of 32 answers added an unsupported detail</title><style>
+  .surface { fill: #fcfcfb; } .card { fill: #ffffff; stroke: rgba(11,11,11,0.10); }
+  .ink { fill: #0b0b0b; } .ink2 { fill: #52514e; } .grid { stroke: #e1e0d9; } .base { stroke: #898781; }
+  .first { fill: #1c5cab; } .top5 { fill: #86b6ef; } .clean { fill: #2a78d6; } .added { fill: #eb6834; }
+  .on-clean { fill: #ffffff; } .on-added { fill: #0b0b0b; }
+  @media (prefers-color-scheme: dark) {
+    .surface { fill: #1a1a19; } .card { fill: #222221; stroke: rgba(255,255,255,0.10); }
+    .ink { fill: #f0efec; } .ink2 { fill: #c3c2b7; } .grid { stroke: #2c2c2a; } .base { stroke: #898781; }
+    .first { fill: #86b6ef; } .top5 { fill: #256abf; } .clean { fill: #3987e5; } .added { fill: #d95926; }
+  }
+</style>
+<rect class="surface" width="1116" height="196" rx="12"/>
+<text x="24" y="36" class="ink" font-size="17" text-anchor="start" font-weight="600">Answers that added an unsupported detail, out of 32</text>
+<rect class="clean" x="24" y="52" width="12" height="12" rx="2"/>
+<text x="42" y="63" class="ink2" font-size="12" text-anchor="start" font-weight="400">Only stated what the entries say</text>
+<rect class="added" x="256" y="52" width="12" height="12" rx="2"/>
+<text x="274" y="63" class="ink2" font-size="12" text-anchor="start" font-weight="400">Added a detail the entries don't support</text>
+<text x="24" y="106" class="ink" font-size="13" text-anchor="start" font-weight="400">Before the stricter prompt</text>
+<rect class="clean" x="250" y="84" width="554.875" height="34"/>
+<text x="262" y="106" class="on-clean" font-size="14" text-anchor="start" font-weight="600">22</text>
+<path class="added" d="M806.875 84 H1056 a4 4 0 0 1 4 4 V114 a4 4 0 0 1 -4 4 H806.875 Z"/>
+<text x="818.875" y="106" class="on-added" font-size="14" text-anchor="start" font-weight="600">10</text>
+<text x="24" y="154" class="ink" font-size="13" text-anchor="start" font-weight="400">After the stricter prompt</text>
+<rect class="clean" x="250" y="132" width="706.75" height="34"/>
+<text x="262" y="154" class="on-clean" font-size="14" text-anchor="start" font-weight="600">28</text>
+<path class="added" d="M958.75 132 H1056 a4 4 0 0 1 4 4 V162 a4 4 0 0 1 -4 4 H958.75 Z"/>
+<text x="970.75" y="154" class="on-added" font-size="14" text-anchor="start" font-weight="600">4</text>
+</svg>
