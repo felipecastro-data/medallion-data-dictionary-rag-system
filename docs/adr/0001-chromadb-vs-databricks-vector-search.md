@@ -20,11 +20,11 @@ Use ChromaDB (option 1). Nothing else needs to run, it uses the project's one em
 
 ## Trade-offs
 
-**Cost.** ChromaDB adds no service cost. A full rebuild took 7.4 s and $0.00016 of Voyage tokens, so losing the index costs very little. Vector Search would use the Free Edition's only endpoint, and its cost on a paid workspace wasn't checked.
+**Cost.** ChromaDB adds no service cost. A full rebuild took 8.0 s and $0.00016 of Voyage tokens, so losing the index costs very little. Vector Search would use the Free Edition's only endpoint, and its cost on a paid workspace wasn't checked.
 
 **Accuracy.** Vector Search wasn't tested, so there's no comparison to report. With ChromaDB, the expected column ranked first on 22 of 26 scored questions and was in the top 5 on all 26. Those figures depend mostly on the embedding model and description text, which Vector Search could also use. With only 80 entries, the choice of search engine is unlikely to change them much, but that's a judgement rather than a measurement.
 
-**Latency.** Median retrieval was 0.20 s, including the Voyage call, against a median of 2.29 s for the whole answer. Search isn't the slow step.
+**Latency.** Median retrieval was 0.21 s, including the Voyage call, against a median of 1.86 s for the whole answer. Search isn't the slow step.
 
 **Costs of this choice**
 

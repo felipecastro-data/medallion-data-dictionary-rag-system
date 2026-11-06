@@ -1,5 +1,5 @@
 {
-  "measured_at": "2026-11-06T13:48:42+00:00",
+  "measured_at": "2026-11-06T14:12:14+00:00",
   "models": {
     "description": "claude-haiku-4-5-20251001",
     "chat": "claude-haiku-4-5-20251001",
@@ -13,18 +13,18 @@
   "top_k": 5,
   "generation": {
     "columns": 80,
-    "elapsed_seconds": 106.8,
-    "seconds_per_column": 1.33,
+    "elapsed_seconds": 122.7,
+    "seconds_per_column": 1.53,
     "input_tokens": 37624,
-    "output_tokens": 3284,
-    "cost_usd": 0.05404,
-    "cost_per_column_usd": 0.000676,
+    "output_tokens": 3246,
+    "cost_usd": 0.05385,
+    "cost_per_column_usd": 0.000673,
     "guardrail_retries": 0,
     "guardrail_rejections": 0
   },
   "index": {
-    "full_build_seconds": 7.4,
-    "unchanged_run_seconds": 4.6,
+    "full_build_seconds": 8.0,
+    "unchanged_run_seconds": 4.4,
     "voyage_tokens": 2595,
     "cost_usd": 0.000156
   },
@@ -56,10 +56,10 @@
         "hit_at_top_k": 0
       }
     },
-    "median_latency_seconds": 2.29,
-    "max_latency_seconds": 3.4
+    "median_latency_seconds": 1.86,
+    "max_latency_seconds": 2.69
   },
-  "cost_per_question_usd": 0.001184,
+  "cost_per_question_usd": 0.001209,
   "questions": [
     {
       "id": "D01",
@@ -79,13 +79,13 @@
       ],
       "hit_at_1": false,
       "hit_at_top_k": true,
-      "retrieve_seconds": 0.29,
-      "answer_seconds": 1.71,
+      "retrieve_seconds": 0.31,
+      "answer_seconds": 1.36,
       "voyage_tokens": 14,
-      "input_tokens": 552,
-      "output_tokens": 65,
-      "cost_usd": 0.000878,
-      "answer": "That would be **customer_ltv.lifetime_revenue**. It represents the total revenue from a customer across all their orders, calculated from the net amount (after discounts, before tax) of every order item they've purchased. It's the best measure of a customer's total spending over time."
+      "input_tokens": 703,
+      "output_tokens": 64,
+      "cost_usd": 0.001024,
+      "answer": "That would be `customer_ltv.lifetime_revenue` in the Gold layer. It represents the total revenue from a customer, calculated from the net amount of all their order items (after discount, before tax). This is your best choice for understanding a customer's total spending across their entire history."
     },
     {
       "id": "D02",
@@ -105,13 +105,13 @@
       ],
       "hit_at_1": true,
       "hit_at_top_k": true,
-      "retrieve_seconds": 0.38,
-      "answer_seconds": 2.21,
+      "retrieve_seconds": 0.26,
+      "answer_seconds": 1.35,
       "voyage_tokens": 12,
-      "input_tokens": 547,
-      "output_tokens": 136,
-      "cost_usd": 0.001228,
-      "answer": "To find how long a customer was active between their first and latest purchase, you'd use **customer_ltv.customer_tenure_days** from the gold layer. This column directly measures the span of a customer's ordering history\u2014the number of days between their first and last order.\n\nFor context, you can also look at **customer_ltv.first_order_date** and **customer_ltv.last_order_date** individually if you want to see the specific dates. The latest order date in this dataset is 1998-08-02, so any customer active up to that point is captured in the data."
+      "input_tokens": 698,
+      "output_tokens": 75,
+      "cost_usd": 0.001074,
+      "answer": "That's what `customer_ltv.customer_tenure_days` measures \u2014 it's the number of days between a customer's first and last order. It tells you the span of their ordering history. So if you want to know how long a customer was active from their first purchase to their most recent one, that's the column to look at."
     },
     {
       "id": "D03",
@@ -131,13 +131,13 @@
       ],
       "hit_at_1": false,
       "hit_at_top_k": true,
-      "retrieve_seconds": 0.4,
-      "answer_seconds": 2.67,
+      "retrieve_seconds": 0.19,
+      "answer_seconds": 2.31,
       "voyage_tokens": 11,
-      "input_tokens": 598,
-      "output_tokens": 197,
-      "cost_usd": 0.001584,
-      "answer": "You can find daily order counts in the **daily_sales_summary.order_count** column in the gold layer. This metric tracks the total number of orders placed on each given day and is specifically designed for analyzing daily sales volume and transaction trends.\n\nThe underlying data comes from **daily_sales_summary.order_date**, which provides the calendar date for each daily summary row (covering the full range from 1992-01-01 to 1998-08-02). Together, these columns let you see both *when* each day was and *how many* orders occurred on that day.\n\nIf you need the raw order dates themselves to do your own aggregation, you can also look at **orders.order_date** or **order_items.order_date** in the silver layer, but the gold layer's daily_sales_summary is the cleanest way to get pre-aggregated daily order counts."
+      "input_tokens": 749,
+      "output_tokens": 164,
+      "cost_usd": 0.00157,
+      "answer": "You can find the daily order count in the gold layer table `daily_sales_summary.order_count`. This column contains the total number of orders placed on a given day and is used to track daily sales volume and analyze transaction trends across the business.\n\nThe table `daily_sales_summary` has one row per date, spanning from 1992-01-01 to 1998-08-02, so you'll get a complete daily breakdown across that period. The `daily_sales_summary.order_count` is derived from `2_silver.order_items.order_id`, and pairs with `daily_sales_summary.order_date` (the calendar date for each row) to give you the date and its corresponding order count together."
     },
     {
       "id": "D04",
@@ -158,12 +158,12 @@
       "hit_at_1": true,
       "hit_at_top_k": true,
       "retrieve_seconds": 0.19,
-      "answer_seconds": 1.61,
+      "answer_seconds": 1.33,
       "voyage_tokens": 12,
-      "input_tokens": 621,
-      "output_tokens": 81,
-      "cost_usd": 0.001027,
-      "answer": "That would be the `order_items.net_amount` column in the silver layer. It represents the line item's value after the discount is applied but before tax is added. It's calculated by taking the extended price and multiplying it by (1 minus the discount rate), so you're getting the actual amount you'd pay for that line item after the discount comes off."
+      "input_tokens": 772,
+      "output_tokens": 60,
+      "cost_usd": 0.001073,
+      "answer": "The line item's value after discount and before tax is in the silver layer column **order_items.net_amount**. It's calculated as extended_price multiplied by (1 - discount), so it represents what the line is worth once the discount has been applied."
     },
     {
       "id": "D05",
@@ -184,13 +184,13 @@
       ],
       "hit_at_1": true,
       "hit_at_top_k": true,
-      "retrieve_seconds": 0.22,
-      "answer_seconds": 1.52,
+      "retrieve_seconds": 0.19,
+      "answer_seconds": 1.29,
       "voyage_tokens": 11,
-      "input_tokens": 620,
-      "output_tokens": 87,
-      "cost_usd": 0.001056,
-      "answer": "That would be **order_items.extended_price** in the silver layer. It represents the line item's value before discount and tax, and it's calculated from the quantity multiplied by the part's retail price. This is your starting point before any discounts are applied \u2014 once you apply the discount rate from **order_items.discount**, you get down to **order_items.net_amount**."
+      "input_tokens": 771,
+      "output_tokens": 61,
+      "cost_usd": 0.001077,
+      "answer": "That would be **order_items.extended_price** (silver layer). The dictionary describes it as \"the line item's value before discount and tax.\" It's derived from the bronze layer's **1_bronze.raw_lineitem.l_extendedprice**."
     },
     {
       "id": "D06",
@@ -210,13 +210,13 @@
       ],
       "hit_at_1": true,
       "hit_at_top_k": true,
-      "retrieve_seconds": 0.19,
-      "answer_seconds": 1.94,
+      "retrieve_seconds": 0.38,
+      "answer_seconds": 1.32,
       "voyage_tokens": 13,
-      "input_tokens": 537,
-      "output_tokens": 131,
-      "cost_usd": 0.001193,
-      "answer": "To find out how an item was sent, you'd look at the **raw_lineitem.l_shipmode** column in the bronze layer. This field records the shipping mode for each line item and can be one of seven values: AIR, FOB, MAIL, RAIL, REG AIR, SHIP, or TRUCK.\n\nIf you're working with cleaned data in the silver layer, you might also want to cross-reference this with **order_items.ship_date**, which tracks when the item was actually shipped and helps you understand the fulfillment timeline alongside the mode of transport."
+      "input_tokens": 688,
+      "output_tokens": 72,
+      "cost_usd": 0.001049,
+      "answer": "The shipping mode for a line item is recorded in raw_lineitem.l_shipmode (bronze layer). According to the data dictionary, this field captures how an item was sent and can be one of these values: AIR, FOB, MAIL, RAIL, REG AIR, SHIP, or TRUCK."
     },
     {
       "id": "D07",
@@ -236,13 +236,13 @@
       ],
       "hit_at_1": true,
       "hit_at_top_k": true,
-      "retrieve_seconds": 0.19,
-      "answer_seconds": 1.54,
+      "retrieve_seconds": 0.2,
+      "answer_seconds": 1.39,
       "voyage_tokens": 9,
-      "input_tokens": 539,
-      "output_tokens": 76,
-      "cost_usd": 0.00092,
-      "answer": "The column that indicates whether a line item was returned is `raw_lineitem.l_returnflag`. It's a single-character field with three possible values: A (presumably \"accepted\" or no return), N (no return), and R (returned). This bronze-layer column captures the return flag exactly as it comes from the source system."
+      "input_tokens": 690,
+      "output_tokens": 57,
+      "cost_usd": 0.000976,
+      "answer": "That would be `raw_lineitem.l_returnflag`. It's a single-character field with values A, N, and R. The dictionary doesn't define what each of those codes means, just that those are the values present in the data."
     },
     {
       "id": "D08",
@@ -263,13 +263,13 @@
       ],
       "hit_at_1": true,
       "hit_at_top_k": true,
-      "retrieve_seconds": 0.54,
-      "answer_seconds": 1.79,
+      "retrieve_seconds": 0.52,
+      "answer_seconds": 1.7,
       "voyage_tokens": 4,
-      "input_tokens": 503,
-      "output_tokens": 98,
-      "cost_usd": 0.000993,
-      "answer": "To find out who processed an order, you'd look at the clerk information. In the silver layer, you can use **orders.clerk**, which contains the identifier of the clerk who processed the order. It's formatted as \"Clerk#\" followed by a number.\n\nIf you're working with the raw bronze data, the equivalent field is **raw_orders.o_clerk**, which has the same format and comes directly from the source system before any cleaning."
+      "input_tokens": 654,
+      "output_tokens": 99,
+      "cost_usd": 0.001149,
+      "answer": "To identify who processed an order, you'd use the **orders.clerk** column in the silver layer. It contains the identifier of the clerk who processed the order, formatted as \"Clerk#\" followed by a number.\n\nIf you're working with the bronze layer instead, you can find the same information in **raw_orders.o_clerk**, which has the clerk identifier in the same \"Clerk#\" format as it came in from the source system."
     },
     {
       "id": "D09",
@@ -289,13 +289,13 @@
       ],
       "hit_at_1": true,
       "hit_at_top_k": true,
-      "retrieve_seconds": 0.39,
-      "answer_seconds": 1.5,
+      "retrieve_seconds": 0.2,
+      "answer_seconds": 1.31,
       "voyage_tokens": 8,
-      "input_tokens": 503,
-      "output_tokens": 92,
-      "cost_usd": 0.000963,
-      "answer": "The commit date for a line item is stored in `raw_lineitem.l_commitdate` in the bronze layer. This is the date when the line item was committed to, as recorded in the source system. According to the data dictionary, about half of a 20,000-row sample shipped after this commit date, which suggests it represents when the supplier committed to fulfilling the line item rather than when it actually shipped."
+      "input_tokens": 654,
+      "output_tokens": 71,
+      "cost_usd": 0.001009,
+      "answer": "According to the data dictionary, the commit date for a line item is recorded in raw_lineitem.l_commitdate (bronze layer). This column contains the commit date as recorded in the source system. The dictionary notes that in a 20,000-row sample, about half of the line items shipped after this commit date."
     },
     {
       "id": "D10",
@@ -315,13 +315,13 @@
       ],
       "hit_at_1": true,
       "hit_at_top_k": true,
-      "retrieve_seconds": 0.26,
-      "answer_seconds": 2.54,
+      "retrieve_seconds": 0.4,
+      "answer_seconds": 2.29,
       "voyage_tokens": 7,
-      "input_tokens": 510,
-      "output_tokens": 155,
-      "cost_usd": 0.001285,
-      "answer": "Based on the data dictionary, the arrival date of a line item is captured in **raw_lineitem.l_receiptdate** (the bronze layer). This field tracks when a line item was actually received and is explicitly described as being used to track fulfillment timing.\n\nYou'll also find this same information cleaned and available in the silver layer, though the dictionary doesn't provide a specific silver-layer column name for receipt date \u2014 it only documents **order_items.ship_date**, which tracks when the item shipped (an earlier point in the fulfillment cycle). So if you need the actual arrival/receipt date, you'd want to use the bronze **raw_lineitem.l_receiptdate** field directly."
+      "input_tokens": 661,
+      "output_tokens": 172,
+      "cost_usd": 0.001521,
+      "answer": "Based on the data dictionary, the arrival date of a line item is captured in **raw_lineitem.l_receiptdate** (bronze layer). The dictionary describes it as \"the date a line item was received, as recorded in the source system\" and notes it's \"used to track fulfillment timing.\"\n\nThis column is the source for tracking when items actually arrived. There's also **raw_lineitem.l_shipdate** (the date it shipped) and **raw_lineitem.l_commitdate** (a committed date), but l_receiptdate is the one explicitly tied to receipt/arrival.\n\nNote that the dictionary doesn't define the exact format or precision of these dates, only that l_receiptdate records when the line item was received according to the source system."
     },
     {
       "id": "D11",
@@ -342,13 +342,13 @@
       ],
       "hit_at_1": true,
       "hit_at_top_k": true,
-      "retrieve_seconds": 0.2,
-      "answer_seconds": 2.04,
+      "retrieve_seconds": 0.21,
+      "answer_seconds": 2.23,
       "voyage_tokens": 8,
-      "input_tokens": 552,
-      "output_tokens": 143,
-      "cost_usd": 0.001267,
-      "answer": "A customer's phone number is stored in two places depending on which medallion layer you're querying.\n\nIn the **bronze layer**, you'll find the raw, as-ingested phone number in `raw_customers.c_phone`. This is the data pulled directly from the source system, formatted as two, three, three and four digits separated by hyphens.\n\nIn the **silver layer**, the cleaned version lives in `customers.phone`, which has the same format but has gone through the data cleaning and validation process. For analysis and reporting, you should use `customers.phone` from the silver layer since it's the curated, reliable version of the data."
+      "input_tokens": 703,
+      "output_tokens": 142,
+      "cost_usd": 0.001413,
+      "answer": "A customer's phone number is stored in two places depending on which medallion layer you're working with.\n\nIn the bronze layer, it's in **raw_customers.c_phone**, which contains the customer telephone number as ingested from the source system. The phone number is formatted as two, three, three and four digits separated by hyphens.\n\nFor analysis and reporting, you'll want to use **customers.phone** in the silver layer, which is the cleaned version of that same data. It maintains the same format\u2014two, three, three and four digits separated by hyphens\u2014but has been processed and validated as part of the silver layer cleaning pipeline."
     },
     {
       "id": "D12",
@@ -369,13 +369,13 @@
       ],
       "hit_at_1": true,
       "hit_at_top_k": true,
-      "retrieve_seconds": 0.21,
-      "answer_seconds": 2.32,
+      "retrieve_seconds": 0.41,
+      "answer_seconds": 1.93,
       "voyage_tokens": 9,
-      "input_tokens": 471,
-      "output_tokens": 135,
-      "cost_usd": 0.001147,
-      "answer": "For identifying what country a customer is in, you'll want to use either `raw_customers.c_nationkey` in the bronze layer or `customers.nation_key` in the silver layer\u2014they both serve the same purpose. The silver version (`customers.nation_key`) is the cleaned version and would typically be your better choice for analytics.\n\nFair warning though: these columns contain numeric keys rather than country names. The data dictionary notes that the lakehouse doesn't have a nation table to join these keys to, so you'd be working with numeric identifiers rather than readable country names unless you bring in your own nation reference data."
+      "input_tokens": 622,
+      "output_tokens": 120,
+      "cost_usd": 0.001223,
+      "answer": "Based on the data dictionary, there are two columns that show what country a customer is in:\n\nIn the bronze layer, **raw_customers.c_nationkey** is the numeric nation or country key for the customer as received from the source system.\n\nIn the silver layer, **customers.nation_key** is the cleaned numeric key for the customer's nation or country. However, the dictionary notes that the lakehouse has no nation table to join it to, so you'd need to use that key value directly without being able to look up the actual country name."
     },
     {
       "id": "D13",
@@ -396,13 +396,13 @@
       ],
       "hit_at_1": true,
       "hit_at_top_k": true,
-      "retrieve_seconds": 0.2,
-      "answer_seconds": 1.86,
+      "retrieve_seconds": 0.19,
+      "answer_seconds": 2.05,
       "voyage_tokens": 9,
-      "input_tokens": 605,
-      "output_tokens": 127,
-      "cost_usd": 0.001241,
-      "answer": "Looking at the data dictionary, the tax rate on an order line is stored in **order_items.tax** (silver layer). It's expressed as a decimal fraction, so a value of 0.07 means 7% tax was applied to that line item.\n\nThis column comes from the bronze layer's **raw_lineitem.l_tax**, which contains the tax data as ingested from the source system. In the raw data, sampled values range from 0.00 to 0.08, so you'd see tax rates anywhere from 0% to 8%."
+      "input_tokens": 756,
+      "output_tokens": 134,
+      "cost_usd": 0.001427,
+      "answer": "The tax rate charged on an order line is stored in **order_items.tax** in the silver layer. It's expressed as a decimal fraction\u2014for example, 0.07 represents a 7% tax rate. This column is used to calculate the actual tax amounts on individual line items within an order.\n\nIf you're looking at the raw ingested data, the equivalent column is **raw_lineitem.l_tax** in the bronze layer, which contains the tax as a decimal fraction as received from the source system. Based on samples, those values ranged from 0.00 to 0.08."
     },
     {
       "id": "D14",
@@ -422,13 +422,13 @@
       ],
       "hit_at_1": true,
       "hit_at_top_k": true,
-      "retrieve_seconds": 0.19,
-      "answer_seconds": 2.32,
+      "retrieve_seconds": 0.2,
+      "answer_seconds": 1.51,
       "voyage_tokens": 9,
-      "input_tokens": 497,
-      "output_tokens": 145,
-      "cost_usd": 0.001223,
-      "answer": "To find who supplied a line item, you'd use the raw_lineitem.l_suppkey column in the bronze layer. This column contains the supplier identifier for each line item.\n\nHowever, there's an important limitation: according to the data dictionary, the lakehouse currently has no supplier table to join this identifier to. So while raw_lineitem.l_suppkey tells you *which* supplier (by ID), you can't look up additional supplier details like their name or contact information with the data currently available. If you need supplier details beyond just the ID number, you'd need to either ingest a supplier dimension table or check if one exists elsewhere in your medallion architecture."
+      "input_tokens": 648,
+      "output_tokens": 81,
+      "cost_usd": 0.001054,
+      "answer": "Based on the data dictionary, you can identify a supplier using raw_lineitem.l_suppkey, which is the supplier identifier on the line item. However, the dictionary notes that \"the lakehouse has no supplier table to join it to,\" so you'd have the supplier ID but wouldn't be able to look up supplier details like their name or location within this lakehouse."
     },
     {
       "id": "D15",
@@ -450,13 +450,13 @@
       ],
       "hit_at_1": true,
       "hit_at_top_k": true,
-      "retrieve_seconds": 0.24,
-      "answer_seconds": 2.09,
+      "retrieve_seconds": 0.19,
+      "answer_seconds": 2.11,
       "voyage_tokens": 9,
-      "input_tokens": 497,
-      "output_tokens": 170,
-      "cost_usd": 0.001348,
-      "answer": "To find when a record was loaded into the lakehouse, you'd look at the `_ingested_at` column in whichever table you're querying. Each of the main Bronze tables has this column:\n\n- `raw_lineitem._ingested_at` tells you when a line item record was ingested\n- `raw_customers._ingested_at` tells you when a customer record was ingested\n- `raw_orders._ingested_at` tells you when an order record was ingested\n\nThese columns capture the date and time of ingestion including timezone information. Based on the available samples, all records from a single load batch have the same `_ingested_at` value, which makes sense since they were all pulled from the source system at the same time."
+      "input_tokens": 648,
+      "output_tokens": 128,
+      "cost_usd": 0.001289,
+      "answer": "The Bronze layer has `_ingested_at` columns that tell you when a record was loaded into the lakehouse. You'd use the one matching your table:\n\n- `raw_lineitem._ingested_at` for line items\n- `raw_customers._ingested_at` for customers\n- `raw_orders._ingested_at` for orders\n\nEach of these includes both the date and time plus timezone information. Based on sampling, all records within a single load share the same ingestion timestamp, so `_ingested_at` marks when that entire batch came in."
     },
     {
       "id": "D16",
@@ -477,13 +477,13 @@
       ],
       "hit_at_1": true,
       "hit_at_top_k": true,
-      "retrieve_seconds": 0.62,
-      "answer_seconds": 2.19,
+      "retrieve_seconds": 0.35,
+      "answer_seconds": 1.54,
       "voyage_tokens": 12,
-      "input_tokens": 544,
-      "output_tokens": 126,
-      "cost_usd": 0.001175,
-      "answer": "Yes, you can see that in the **customers.account_balance** column (silver layer). It stores each customer's account balance as a decimal amount, which can be negative. The sampled values in the data range from -999.89 to 9,999.79, so it captures both positive balances and accounts that may be overdrawn.\n\nThis column is cleaned data derived from the raw source field **raw_customers.c_acctbal** (bronze layer), so if you're building reports or dashboards, you'll want to use the silver version for accuracy."
+      "input_tokens": 695,
+      "output_tokens": 92,
+      "cost_usd": 0.001156,
+      "answer": "Yes, you can see that in the silver layer. The column **customers.account_balance** stores the customer's account balance as a decimal amount, which can be negative. Based on samples, balances range from -999.89 to 9,999.79.\n\nThis comes from the bronze layer's **raw_customers.c_acctbal**, which is the account balance as originally received from the source system."
     },
     {
       "id": "T01",
@@ -504,13 +504,13 @@
       ],
       "hit_at_1": true,
       "hit_at_top_k": true,
-      "retrieve_seconds": 0.19,
-      "answer_seconds": 2.2,
+      "retrieve_seconds": 0.2,
+      "answer_seconds": 2.46,
       "voyage_tokens": 5,
-      "input_tokens": 545,
-      "output_tokens": 142,
-      "cost_usd": 0.001255,
-      "answer": "Order priority indicates how urgent an order is and comes from the source system. According to the data dictionary, `orders.order_priority` (in the silver layer) can be one of five values: 1-URGENT, 2-HIGH, 3-MEDIUM, 4-NOT SPECIFIED, or 5-LOW. This field is used to filter and group orders by their priority level, so you can identify which orders need immediate attention versus those that are routine.\n\nThe bronze layer has the same information in `raw_orders.o_orderpriority`, which is the raw data as it was ingested before any cleaning transformations were applied."
+      "input_tokens": 696,
+      "output_tokens": 165,
+      "cost_usd": 0.001521,
+      "answer": "The data dictionary doesn't define what order priority *means* in business terms. It only tells you what values it can hold.\n\nAccording to the dictionary, `orders.order_priority` (silver layer) and `raw_orders.o_orderpriority` (bronze layer) both contain the same set of codes: 1-URGENT, 2-HIGH, 3-MEDIUM, 4-NOT SPECIFIED, or 5-LOW. The silver version is described as \"cleaned\" and is used to filter and group orders by priority, while the bronze version is the raw ingestion from the source system.\n\nThat's all the dictionary says\u2014it doesn't explain what the business purpose of these priority levels is or how they're used operationally."
     },
     {
       "id": "T02",
@@ -531,13 +531,13 @@
       ],
       "hit_at_1": true,
       "hit_at_top_k": true,
-      "retrieve_seconds": 0.2,
-      "answer_seconds": 2.43,
+      "retrieve_seconds": 0.21,
+      "answer_seconds": 2.41,
       "voyage_tokens": 7,
-      "input_tokens": 541,
-      "output_tokens": 158,
-      "cost_usd": 0.001331,
-      "answer": "A customer's market segment is one of five standardized categories that classifies what type of business they operate: AUTOMOBILE, BUILDING, FURNITURE, HOUSEHOLD, or MACHINERY. It's used throughout the lakehouse to analyze customer behavior and compare performance across different business types.\n\nYou'll find this information in the silver layer at `customers.market_segment`, which is the cleaned version sourced from the bronze raw data. If you're working with order data, `orders.market_segment` contains the same information copied from the customer record at the time the order was placed. For aggregated lifetime value analysis, you can reference `customer_ltv.market_segment` in the gold layer, which groups these segments together with other customer metrics."
+      "input_tokens": 692,
+      "output_tokens": 179,
+      "cost_usd": 0.001587,
+      "answer": "A customer's market segment is one of five categories: AUTOMOBILE, BUILDING, FURNITURE, HOUSEHOLD, or MACHINERY. It's used to analyze customer behavior and business performance by segment, and to compare customer lifetime value across segments.\n\nYou'll find this information in different layers depending on what you need. In the bronze layer, it's stored as raw_customers.c_mktsegment exactly as it came from the source system. In the silver layer, it's been cleaned and appears as customers.market_segment. In the gold layer, it's aggregated into customer_ltv.market_segment for lifetime value analysis.\n\nNote that when market_segment appears in orders.orders.market_segment, it's copied from the customer record at the time the order was placed, so it describes the customer, not the order itself."
     },
     {
       "id": "T03",
@@ -558,13 +558,13 @@
       ],
       "hit_at_1": true,
       "hit_at_top_k": true,
-      "retrieve_seconds": 0.41,
-      "answer_seconds": 2.1,
+      "retrieve_seconds": 0.39,
+      "answer_seconds": 1.68,
       "voyage_tokens": 8,
-      "input_tokens": 497,
-      "output_tokens": 109,
-      "cost_usd": 0.001042,
-      "answer": "To find an order's status, you'd use the **orders.order_status** column in the Silver layer. It contains single-letter codes representing the order status: O (open), F (fulfilled), or P (pending). This is the cleaned, ready-to-use version.\n\nIf you're working with raw Bronze data, you can find the equivalent information in **raw_orders.o_orderstatus**, which has the same values but comes directly from the source system before any cleaning transformations."
+      "input_tokens": 648,
+      "output_tokens": 84,
+      "cost_usd": 0.001068,
+      "answer": "You can find an order's status in the `orders.order_status` column (silver layer). It contains a single-letter code representing the status: O, F, or P. This is the cleaned version derived from `1_bronze.raw_orders.o_orderstatus` in the bronze layer, which has the same values but as ingested directly from the source system."
     },
     {
       "id": "T04",
@@ -586,12 +586,12 @@
       "hit_at_1": true,
       "hit_at_top_k": true,
       "retrieve_seconds": 0.2,
-      "answer_seconds": 3.2,
+      "answer_seconds": 2.48,
       "voyage_tokens": 5,
-      "input_tokens": 539,
-      "output_tokens": 232,
-      "cost_usd": 0.001699,
-      "answer": "Average order value (AOV) appears in your lakehouse at two different levels depending on what you're analyzing.\n\nAt the **gold layer**, you have two aggregated versions. `daily_sales_summary.avg_order_value` tracks the average revenue per order for each day, calculated by dividing that day's total revenue by order count \u2014 useful for spotting trends in how order size changes over time. Meanwhile, `customer_ltv.avg_order_value` does the same calculation but at the customer level, showing each customer's average revenue per order across all their purchases, which helps you compare spending patterns between customers.\n\nBoth of these gold measures are built from the same underlying silver data: `2_silver.order_items.net_amount` and `2_silver.order_items.order_id`.\n\nIf you need the raw building blocks, the silver layer has `orders.total_price` (the cleaned total monetary amount of each order) and `order_items.quantity` (the number of units on each line item), which feed into these aggregations."
+      "input_tokens": 690,
+      "output_tokens": 207,
+      "cost_usd": 0.001725,
+      "answer": "Based on the data dictionary, there are two different average order value columns depending on which gold layer table you're looking at:\n\nIn **daily_sales_summary.avg_order_value**, it's the day's average revenue per order\u2014calculated as total_revenue divided by order_count. This is used to track how order size changes over time, and it's derived from 2_silver.order_items.net_amount and 2_silver.order_items.order_id.\n\nIn **customer_ltv.avg_order_value**, it's the customer's average revenue per order\u2014calculated as lifetime_revenue divided by total_orders. This is used to compare spending patterns across different customers, and it's also derived from 2_silver.order_items.net_amount and 2_silver.order_items.order_id.\n\nBoth are aggregated gold-layer metrics, but one rolls up by day and the other by customer."
     },
     {
       "id": "T05",
@@ -612,13 +612,13 @@
       ],
       "hit_at_1": false,
       "hit_at_top_k": true,
-      "retrieve_seconds": 0.18,
-      "answer_seconds": 2.37,
+      "retrieve_seconds": 0.2,
+      "answer_seconds": 1.9,
       "voyage_tokens": 5,
-      "input_tokens": 490,
-      "output_tokens": 163,
-      "cost_usd": 0.001305,
-      "answer": "The date when an order was placed is stored in the **order_date** column. You'll find this in the Silver layer in two tables: **orders.order_date** and **order_items.order_date**. Both contain the calendar date on which a customer placed their order and are derived from the Bronze layer's **raw_orders.o_orderdate**, which captures the original order date as recorded in the source system.\n\nIf you need to trace back to the raw ingested data, the Bronze layer has **raw_orders.o_orderdate**. Just keep in mind that **raw_orders._ingested_at** is different\u2014that's the timestamp when the record was loaded into the lakehouse, not when the order was actually placed."
+      "input_tokens": 641,
+      "output_tokens": 130,
+      "cost_usd": 0.001291,
+      "answer": "The date an order was placed is captured in **orders.order_date** (silver layer), which represents the calendar date on which a customer placed an order. This column comes from **1_bronze.raw_orders.o_orderdate** in the bronze layer.\n\nIf you're working directly with bronze data, you'd use **raw_orders.o_orderdate**, which is the date as recorded in the source system.\n\nNote that **raw_orders._ingested_at** is different \u2014 that's when the order record was loaded into the lakehouse, not when the order was actually placed."
     },
     {
       "id": "L01",
@@ -639,12 +639,12 @@
       "hit_at_1": false,
       "hit_at_top_k": true,
       "retrieve_seconds": 0.19,
-      "answer_seconds": 1.63,
+      "answer_seconds": 1.34,
       "voyage_tokens": 12,
-      "input_tokens": 483,
-      "output_tokens": 106,
-      "cost_usd": 0.001014,
-      "answer": "The phone number in the cleaned customers table (`customers.phone`) comes from the bronze layer's `raw_customers.c_phone` column. That bronze column contains the customer telephone number as it was ingested from the source system, formatted with hyphens as two, three, three, and four digits. The silver layer takes that raw phone data and cleans it, though in this case the format remains the same\u2014still two, three, three, and four digits separated by hyphens."
+      "input_tokens": 634,
+      "output_tokens": 68,
+      "cost_usd": 0.000975,
+      "answer": "The phone number in the cleaned customers table comes from raw_customers.c_phone in the bronze layer. The customers.phone column is derived directly from 1_bronze.raw_customers.c_phone, and both maintain the same format: two, three, three and four digits separated by hyphens."
     },
     {
       "id": "L02",
@@ -665,12 +665,12 @@
       "hit_at_1": true,
       "hit_at_top_k": true,
       "retrieve_seconds": 0.2,
-      "answer_seconds": 1.95,
+      "answer_seconds": 1.34,
       "voyage_tokens": 11,
-      "input_tokens": 562,
-      "output_tokens": 120,
-      "cost_usd": 0.001163,
-      "answer": "The `order_items.net_amount` column in the silver layer is calculated from two upstream bronze columns: `1_bronze.raw_lineitem.l_discount` and `1_bronze.raw_lineitem.l_extendedprice`. \n\nThe formula applies the discount to the extended price\u2014specifically, it multiplies the extended price by (1 minus the discount rate) to arrive at the net amount before tax. So those two raw lineitem columns are what ultimately determine the net amount you'd see in the cleaned silver layer."
+      "input_tokens": 713,
+      "output_tokens": 76,
+      "cost_usd": 0.001094,
+      "answer": "The `order_items.net_amount` column in the silver layer is derived from two upstream bronze columns: `1_bronze.raw_lineitem.l_discount` and `1_bronze.raw_lineitem.l_extendedprice`. The net amount itself is calculated as extended_price * (1 - discount)."
     },
     {
       "id": "L03",
@@ -690,13 +690,13 @@
       ],
       "hit_at_1": true,
       "hit_at_top_k": true,
-      "retrieve_seconds": 0.31,
-      "answer_seconds": 1.35,
+      "retrieve_seconds": 0.45,
+      "answer_seconds": 1.21,
       "voyage_tokens": 9,
-      "input_tokens": 547,
-      "output_tokens": 67,
-      "cost_usd": 0.000883,
-      "answer": "A customer's lifetime revenue in the `customer_ltv.lifetime_revenue` column is derived from `2_silver.order_items.net_amount`. This represents the total revenue from all of a customer's orders, where each order's contribution is calculated as the line value after discount and before tax."
+      "input_tokens": 698,
+      "output_tokens": 59,
+      "cost_usd": 0.000994,
+      "answer": "According to the data dictionary, customer_ltv.lifetime_revenue is derived from 2_silver.order_items.net_amount. That's the line value after discount and before tax, and it's summed up to get the total revenue from a customer."
     },
     {
       "id": "L04",
@@ -716,13 +716,13 @@
       ],
       "hit_at_1": true,
       "hit_at_top_k": true,
-      "retrieve_seconds": 0.19,
-      "answer_seconds": 1.94,
+      "retrieve_seconds": 0.22,
+      "answer_seconds": 1.64,
       "voyage_tokens": 12,
-      "input_tokens": 546,
-      "output_tokens": 110,
-      "cost_usd": 0.001097,
-      "answer": "The market segment in the orders table comes from the customer record. According to the data dictionary, `orders.market_segment` is copied from the customer record at the Silver layer, so it describes the customer's segment rather than anything specific to the order itself. It's ultimately derived from the Bronze layer's `1_bronze.raw_customers.c_mktsegment`, which traces back to the original TPC-H source data (`samples.tpch.customer.c_mktsegment`)."
+      "input_tokens": 697,
+      "output_tokens": 91,
+      "cost_usd": 0.001153,
+      "answer": "The market segment in the orders table comes from the customer record. According to the data dictionary, orders.market_segment is copied from the customer, so it describes the customer, not the order itself. It's derived from 1_bronze.raw_customers.c_mktsegment, which is the bronze layer's as-ingested version of the customer's market segment from the original TPC-H source data."
     },
     {
       "id": "L05",
@@ -742,13 +742,13 @@
       ],
       "hit_at_1": true,
       "hit_at_top_k": true,
-      "retrieve_seconds": 0.19,
-      "answer_seconds": 1.6,
+      "retrieve_seconds": 0.21,
+      "answer_seconds": 1.14,
       "voyage_tokens": 8,
-      "input_tokens": 533,
-      "output_tokens": 90,
-      "cost_usd": 0.000983,
-      "answer": "The daily total revenue in `daily_sales_summary.total_revenue` comes from `2_silver.order_items.net_amount`. This is the line-level net amount\u2014the value after discounts are applied but before tax\u2014and it's aggregated up to the daily level in the Gold layer. So each day's total revenue is the sum of all those individual order item net amounts for that day."
+      "input_tokens": 684,
+      "output_tokens": 60,
+      "cost_usd": 0.000984,
+      "answer": "The daily total revenue in `daily_sales_summary.total_revenue` comes from `2_silver.order_items.net_amount`. That's the line value after discount and before tax, and it gets aggregated up to the day level for revenue trend analysis."
     },
     {
       "id": "N01",
@@ -766,13 +766,13 @@
       ],
       "hit_at_1": null,
       "hit_at_top_k": null,
-      "retrieve_seconds": 0.18,
-      "answer_seconds": 1.85,
+      "retrieve_seconds": 0.21,
+      "answer_seconds": 1.57,
       "voyage_tokens": 8,
-      "input_tokens": 467,
-      "output_tokens": 110,
-      "cost_usd": 0.001017,
-      "answer": "Based on the data dictionary entries provided, there doesn't appear to be a column that stores a customer's email address. The context includes columns for customer identifiers (raw_customers.c_custkey), names (raw_customers.c_name and customers.customer_name), and addresses (raw_customers.c_address and customers.address), but none of these contain email information. If you need to work with customer contact details, you may want to check whether additional tables or columns exist outside this dictionary excerpt."
+      "input_tokens": 618,
+      "output_tokens": 105,
+      "cost_usd": 0.001143,
+      "answer": "Based on the data dictionary entries provided, I don't see a column that stores a customer's email address. The customer-related columns listed are:\n\n- raw_customers.c_address and customers.address (both free-form address text)\n- raw_customers.c_name and customers.customer_name (both customer names in \"Customer#\" format)\n- raw_customers.c_custkey (customer identifier)\n\nNone of these are described as containing email information."
     },
     {
       "id": "N02",
@@ -790,13 +790,13 @@
       ],
       "hit_at_1": null,
       "hit_at_top_k": null,
-      "retrieve_seconds": 0.19,
-      "answer_seconds": 2.05,
+      "retrieve_seconds": 0.23,
+      "answer_seconds": 1.89,
       "voyage_tokens": 8,
-      "input_tokens": 572,
-      "output_tokens": 111,
-      "cost_usd": 0.001127,
-      "answer": "I don't see a column for a product's brand name in the data dictionary entries provided. The context includes customer and order-related columns from the bronze, silver, and gold layers, but nothing about products or their brands.\n\nIf you're looking for product brand information in this TPC-H lakehouse, you might want to check if there's a products table or lineitem details table that I don't have in the current context. Do you have access to a products or part-related table that might contain brand data?"
+      "input_tokens": 723,
+      "output_tokens": 115,
+      "cost_usd": 0.001298,
+      "answer": "Based on the data dictionary entries provided, I don't see any column that contains a product's brand name. The entries cover customer names across different medallion layers (bronze raw_customers.c_name, silver customer_ltv.customer_name) and source table identifiers for customers, orders, and lineitems, but none of them describe a product brand field.\n\nTo find brand information, you'd need to look at a products table or similar entity table in the dictionary\u2014those aren't included in the context I have access to."
     },
     {
       "id": "N03",
@@ -814,13 +814,13 @@
       ],
       "hit_at_1": null,
       "hit_at_top_k": null,
-      "retrieve_seconds": 0.18,
-      "answer_seconds": 2.37,
+      "retrieve_seconds": 0.22,
+      "answer_seconds": 1.45,
       "voyage_tokens": 7,
-      "input_tokens": 535,
-      "output_tokens": 181,
-      "cost_usd": 0.00144,
-      "answer": "Based on the data dictionary provided, there isn't a column that tracks which warehouse a shipment left from. The shipping-related fields available are:\n\n- raw_lineitem.l_shipdate (bronze) and order_items.ship_date (silver) \u2014 the date shipped\n- raw_lineitem.l_shipmode (bronze) \u2014 how it was shipped (AIR, TRUCK, RAIL, etc.)\n- raw_lineitem.l_shipinstruct (bronze) \u2014 shipping instructions (COLLECT COD, DELIVER IN PERSON, etc.)\n- raw_orders.o_shippriority (bronze) \u2014 priority level\n\nNone of these capture warehouse origin information. You'd need to check if there's a warehouse dimension or location table elsewhere in your lakehouse schema that might link to the lineitem data."
+      "input_tokens": 686,
+      "output_tokens": 90,
+      "cost_usd": 0.001136,
+      "answer": "The data dictionary doesn't contain any column that identifies which warehouse a shipment left from. The shipping-related columns available are raw_lineitem.l_shipdate, raw_lineitem.l_shipinstruct, raw_lineitem.l_shipmode, order_items.ship_date, and raw_orders.o_shippriority, but none of these track warehouse origin or location information."
     },
     {
       "id": "N04",
@@ -838,13 +838,13 @@
       ],
       "hit_at_1": null,
       "hit_at_top_k": null,
-      "retrieve_seconds": 0.2,
-      "answer_seconds": 2.43,
+      "retrieve_seconds": 0.22,
+      "answer_seconds": 2.28,
       "voyage_tokens": 6,
-      "input_tokens": 625,
-      "output_tokens": 163,
-      "cost_usd": 0.00144,
-      "answer": "Based on the data dictionary, order status P is one of three possible single-character codes used in the orders table. The bronze layer field `raw_orders.o_orderstatus` and the silver layer field `orders.order_status` both store this value, along with F and O.\n\nHowever, the data dictionary doesn't explicitly define what P stands for or what it represents semantically. It only tells us that P is a valid value that comes through from the source TPC-H system. For your analysis work, you'd want to use `orders.order_status` from the silver layer since it's the cleaned version, but you'd need to check the TPC-H documentation or your source system specs to learn what P actually means in business terms."
+      "input_tokens": 776,
+      "output_tokens": 146,
+      "cost_usd": 0.001506,
+      "answer": "The data dictionary doesn't define what the letter codes mean. It only tells you that order status can be one of three values: F, O, or P.\n\nYou'll find this in two places depending on which layer you're working with. In the bronze layer, raw_orders.o_orderstatus contains the raw single-character codes as they came from the source system. In the silver layer, orders.order_status contains the same codes in cleaned form. For analysis, you'd want to use the silver version, orders.order_status.\n\nBut the dictionary itself doesn't say what P stands for \u2014 it just lists P as one of the valid values alongside F and O."
     },
     {
       "id": "N05",
@@ -854,21 +854,21 @@
       "match": "none",
       "answer_must": "Says the dictionary has no such column.",
       "retrieved": [
-        "raw_orders.o_clerk",
         "order_items.extended_price",
-        "orders.clerk",
         "order_items.net_amount",
-        "daily_sales_summary.total_revenue"
+        "daily_sales_summary.total_revenue",
+        "customer_ltv.lifetime_revenue",
+        "raw_lineitem.l_extendedprice"
       ],
       "hit_at_1": null,
       "hit_at_top_k": null,
-      "retrieve_seconds": 0.4,
-      "answer_seconds": 2.57,
+      "retrieve_seconds": 0.25,
+      "answer_seconds": 1.62,
       "voyage_tokens": 8,
-      "input_tokens": 646,
-      "output_tokens": 159,
-      "cost_usd": 0.001441,
-      "answer": "Based on the data dictionary provided, I don't see a column that directly shows a sales rep's commission. \n\nThe dictionary includes clerk-related columns like raw_orders.o_clerk (bronze) and orders.clerk (silver), which identify who processed an order, but these don't represent commission amounts. There are also revenue-related columns like order_items.extended_price and order_items.net_amount that capture line-item values, but these are order amounts rather than commission calculations.\n\nIf you're looking to calculate commissions, you'd likely need to combine a clerk identifier with revenue data, but that calculation isn't pre-built in the medallion layers described here. Do you have a different question about clerk assignments or revenue figures?"
+      "input_tokens": 749,
+      "output_tokens": 63,
+      "cost_usd": 0.001064,
+      "answer": "The data dictionary entries provided don't contain any column related to a sales rep's commission. The columns listed cover extended price, net amount (after discount), and aggregated revenue figures, but none of them describe or track commissions. I can't answer this question based on the available data dictionary."
     },
     {
       "id": "N06",
@@ -886,13 +886,13 @@
       ],
       "hit_at_1": null,
       "hit_at_top_k": null,
-      "retrieve_seconds": 0.32,
-      "answer_seconds": 1.71,
+      "retrieve_seconds": 0.38,
+      "answer_seconds": 1.34,
       "voyage_tokens": 6,
-      "input_tokens": 549,
-      "output_tokens": 112,
-      "cost_usd": 0.001109,
-      "answer": "The data dictionary doesn't specify what currency any of the price fields are stored in. The columns like `raw_orders.o_totalprice`, `orders.total_price`, `raw_lineitem.l_extendedprice`, and `customers.account_balance` are all described as decimal amounts, but there's no mention of whether they represent dollars, euros, or another currency. You'd need to check the original TPC-H source documentation or reach out to your data team to confirm the currency."
+      "input_tokens": 700,
+      "output_tokens": 72,
+      "cost_usd": 0.00106,
+      "answer": "The data dictionary entries don't specify a currency for any of the price columns. They describe raw_orders.o_totalprice, orders.total_price, raw_lineitem.l_extendedprice, and customers.account_balance as decimal amounts, but none of the entries mention what currency those amounts represent."
     }
   ]
 }

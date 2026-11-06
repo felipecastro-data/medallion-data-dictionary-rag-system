@@ -29,7 +29,7 @@ Use option 2, for bronze `STRING` and `VARCHAR` columns only. A second failure r
 - It's a plain text match, so it can reject acceptable text. "Rather than" is on the list, and it can appear in a perfectly accurate sentence.
 - In the measured run of all 80 columns, it never fired: 0 retries and 0 rejections. It's a backstop rather than something the current prompt depends on. That run also means the retry path is covered by [unit tests](../../tests/test_guardrail.py) but hasn't been seen working against the live API.
 - It doesn't replace review: 74 of the 80 generated descriptions were corrected afterwards, for problems a phrase list can't detect, such as claims about the data that turned out to be untrue.
-- It only covers descriptions. Chatbot answers have no such check, and 10 of 32 measured answers added unsupported details.
+- It only covers descriptions. Chatbot answers have no such check. They rely on the prompt alone, and 4 of 32 measured answers still added unsupported details.
 
 ## When to revisit
 
