@@ -2,7 +2,8 @@
 
 Reads every data_dictionary row that has a description, embeds a
 "table_name.column_name: description" string for each with Voyage AI, and upserts
-the embeddings into a local persistent ChromaDB collection at ./chroma_db.
+the embeddings into a local persistent ChromaDB collection at ./chroma_db. Refuses to run
+while the schema-drift check has unaccepted changes.
 
 Usage:
     medallion-index
@@ -10,15 +11,20 @@ Usage:
 
 from __future__ import annotations
 
+import logging
 import os
 
 import chromadb
 import voyageai
 from dotenv import load_dotenv
 
+from medallion_rag.hooks.detect_schema_change import run as check_schema_drift
+from medallion_rag.logging_config import configure_logging
 from medallion_rag.mcp_server.db import METADATA_TABLE, run_query
 
 load_dotenv()
+
+logger = logging.getLogger(__name__)
 
 VOYAGE_MODEL = "voyage-3.5"
 CHROMA_DB_PATH = "./chroma_db"
@@ -51,7 +57,7 @@ def run() -> None:
     """Fetch described rows, embed them, and upsert into the local ChromaDB collection."""
     rows = fetch_described_rows()
     if not rows:
-        print(f"No rows with a description found in {METADATA_TABLE}.")
+        logger.warning("No rows with a description found in %s.", METADATA_TABLE)
         return
 
     ids = [f"{row['table_name']}.{row['column_name']}" for row in rows]
@@ -68,7 +74,7 @@ def run() -> None:
         for row in rows
     ]
 
-    print(f"Embedding {len(documents)} data_dictionary row(s) with {VOYAGE_MODEL}...")
+    logger.info("Embedding %d data_dictionary row(s) with %s...", len(documents), VOYAGE_MODEL)
     voyage_client = voyageai.Client(api_key=os.environ["VOYAGE_API_KEY"])
     embeddings = embed_documents(voyage_client, documents)
 
@@ -76,8 +82,18 @@ def run() -> None:
     collection = chroma_client.get_or_create_collection(name=COLLECTION_NAME)
     collection.upsert(ids=ids, embeddings=embeddings, documents=documents, metadatas=metadatas)
 
-    print(f"Upserted {len(ids)} embedding(s) into '{COLLECTION_NAME}' at {CHROMA_DB_PATH}.")
+    logger.info("Run complete: embedded %d row(s) into '%s'.", len(ids), COLLECTION_NAME)
+
+
+def main() -> int:
+    """CLI entry point: rebuild the index only if the schema-drift check passes."""
+    configure_logging()
+    if check_schema_drift() != 0:
+        logger.error("Index not rebuilt because of unaccepted schema changes.")
+        return 1
+    run()
+    return 0
 
 
 if __name__ == "__main__":
-    run()
+    raise SystemExit(main())

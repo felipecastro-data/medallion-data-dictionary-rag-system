@@ -17,7 +17,7 @@ flowchart LR
     SUB -->|writes descriptions to data_dictionary| DB
     SUB --> EMB --> BOT
     DB -.->|detects drift| HOOK
-    HOOK -.->|flags drift, prints rebuild instructions<br/>does not auto-rebuild| EMB
+    HOOK -.->|blocks re-indexing until<br/>the change is accepted| EMB
 ```
 
 ![The medallion lakehouse in Databricks (Unity Catalog, 1_bronze/2_silver/3_gold)](docs/lakehouse-catalog.png)
@@ -30,13 +30,13 @@ All code lives under [`src/medallion_rag/`](src/medallion_rag):
 - [`subagents/`](src/medallion_rag/subagents) — Reads table/column metadata via MCP, drafts descriptions with Claude, writes them back to `data_dictionary`.
 - [`embeddings/`](src/medallion_rag/embeddings) — Embeds dictionary entries with Voyage AI and indexes them in ChromaDB.
 - [`chatbot/`](src/medallion_rag/chatbot) — Streamlit chat UI; retrieves from ChromaDB and answers via the Anthropic API.
-- [`hooks/`](src/medallion_rag/hooks) — Schema drift detector.
+- [`hooks/`](src/medallion_rag/hooks) — Schema drift check that blocks re-indexing until a change is reviewed.
 
 ## Key engineering decisions
 
-- **Layer-aware description generation.** Bronze columns are described as raw, as-ingested data — the prompt explicitly forbids asserting uniqueness, primary-key status, or clean joinability that hasn't been established yet at that layer. Silver/Gold columns get relational language (primary key, join key, etc.) once the data has actually been conformed. ([`subagents/generate_descriptions.py`](src/medallion_rag/subagents/generate_descriptions.py#L81-L91))
+- **Layer-aware description generation.** Bronze columns are described as raw, as-ingested data — the prompt explicitly forbids asserting uniqueness, primary-key status, or clean joinability that hasn't been established yet at that layer. Silver/Gold columns get relational language (primary key, join key, etc.) once the data has actually been conformed. ([`subagents/generate_descriptions.py`](src/medallion_rag/subagents/generate_descriptions.py#L85-L95))
 
-- **Programmatic guardrail against LLM fabrication.** Prompt wording alone didn't stop the model from inventing plausible-sounding but unevidenced claims — e.g. calling a plain bronze STRING column "encoded" or "hashed" with no such pattern in the sample values. A banned-phrase filter catches this on bronze string columns and triggers one corrective retry with the offending phrase named explicitly. ([`subagents/generate_descriptions.py`](src/medallion_rag/subagents/generate_descriptions.py#L159-L269))
+- **Programmatic guardrail against LLM fabrication.** Prompt wording alone didn't stop the model from inventing plausible-sounding but unevidenced claims — e.g. calling a plain bronze STRING column "encoded" or "hashed" with no such pattern in the sample values. A banned-phrase filter catches this on bronze string columns and triggers one corrective retry with the offending phrase named explicitly. ([`subagents/generate_descriptions.py`](src/medallion_rag/subagents/generate_descriptions.py#L163-L272))
 
 - **Retrieval-aware answer logic, not "newest layer wins."** When the top two ChromaDB matches are near-tied, the chatbot distinguishes *why* they're tied before deciding how to answer: raw-vs-cleaned pairs (bronze/silver) get a "here's both, but use the cleaned one" answer, while a general column tied with a purpose-built Gold aggregate gets "here's both, scoped differently — you decide," since a Gold aggregate isn't simply a more-refined version of the same thing. ([`chatbot/app.py`](src/medallion_rag/chatbot/app.py#L77-L132))
 
@@ -68,6 +68,12 @@ To check for lakehouse schema drift at any point (e.g. via a scheduled task):
 
 ```bash
 medallion-schema-drift
+```
+
+It exits 1 when the schema differs from the saved baseline, and `medallion-index` runs the same check first and refuses to rebuild. After reviewing the logged changes, record the new baseline:
+
+```bash
+medallion-schema-drift --accept
 ```
 
 ## Development

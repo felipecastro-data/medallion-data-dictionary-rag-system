@@ -15,9 +15,9 @@ dev = ["pytest==9.2.0", "ruff==0.17.4"]
 
 [project.scripts]
 medallion-describe = "medallion_rag.subagents.generate_descriptions:main"
-medallion-index = "medallion_rag.embeddings.build_index:run"
+medallion-index = "medallion_rag.embeddings.build_index:main"
 medallion-chat = "medallion_rag.chatbot.cli:main"
-medallion-schema-drift = "medallion_rag.hooks.detect_schema_change:run"
+medallion-schema-drift = "medallion_rag.hooks.detect_schema_change:main"
 
 [tool.setuptools.dynamic]
 dependencies = { file = ["requirements.txt"] }
