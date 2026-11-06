@@ -34,9 +34,9 @@ All code lives under [`src/medallion_rag/`](src/medallion_rag):
 
 ## Key engineering decisions
 
-- **Layer-aware description generation.** Bronze columns are described as raw, as-ingested data — the prompt explicitly forbids asserting uniqueness, primary-key status, or clean joinability that hasn't been established yet at that layer. Silver/Gold columns get relational language (primary key, join key, etc.) once the data has actually been conformed. ([`subagents/generate_descriptions.py`](src/medallion_rag/subagents/generate_descriptions.py#L85-L95))
+- **Layer-aware description generation.** Bronze columns are described as raw, as-ingested data — the prompt explicitly forbids asserting uniqueness, primary-key status, or clean joinability that hasn't been established yet at that layer. Silver/Gold columns get relational language (primary key, join key, etc.) once the data has actually been conformed. ([`subagents/generate_descriptions.py`](src/medallion_rag/subagents/generate_descriptions.py#L87-L97))
 
-- **Programmatic guardrail against LLM fabrication.** Prompt wording alone didn't stop the model from inventing plausible-sounding but unevidenced claims — e.g. calling a plain bronze STRING column "encoded" or "hashed" with no such pattern in the sample values. A banned-phrase filter catches this on bronze string columns and triggers one corrective retry with the offending phrase named explicitly. ([`subagents/generate_descriptions.py`](src/medallion_rag/subagents/generate_descriptions.py#L163-L272))
+- **Programmatic guardrail against LLM fabrication.** Prompt wording alone didn't stop the model from inventing plausible-sounding but unevidenced claims — e.g. calling a plain bronze STRING column "encoded" or "hashed" with no such pattern in the sample values. A banned-phrase filter catches this on bronze string columns and triggers one corrective retry with the offending phrase named explicitly. ([`subagents/generate_descriptions.py`](src/medallion_rag/subagents/generate_descriptions.py#L165-L274))
 
 - **Retrieval-aware answer logic, not "newest layer wins."** When the top two ChromaDB matches are near-tied, the chatbot distinguishes *why* they're tied before deciding how to answer: raw-vs-cleaned pairs (bronze/silver) get a "here's both, but use the cleaned one" answer, while a general column tied with a purpose-built Gold aggregate gets "here's both, scoped differently — you decide," since a Gold aggregate isn't simply a more-refined version of the same thing. ([`chatbot/app.py`](src/medallion_rag/chatbot/app.py#L77-L132))
 
@@ -47,34 +47,35 @@ All code lives under [`src/medallion_rag/`](src/medallion_rag):
 - An [Anthropic API key](https://console.anthropic.com/)
 - A [Voyage AI API key](https://www.voyageai.com/)
 
-**Install**
+**Run**
 
 ```bash
-pip install -e .
 cp .env.example .env   # fill in DATABRICKS_*, ANTHROPIC_API_KEY, VOYAGE_API_KEY
+make up
 ```
 
-If the repo sits in an iCloud-synced folder on macOS, name the virtual environment `venv`, not `.venv`. iCloud flags dot-folders as hidden, and recent Python versions skip hidden `.pth` files, which breaks the editable install.
+`make up` creates `venv/`, installs the project, builds the dictionary and index, and launches the chatbot.
 
-**Run, in order, from the repo root**
+**Refresh after the lakehouse changes**
 
 ```bash
-medallion-describe   # populate data_dictionary descriptions
-medallion-index      # embed + index into ChromaDB
-medallion-chat       # launch the chatbot
+make refresh
 ```
 
-To check for lakehouse schema drift at any point (e.g. via a scheduled task):
+This can run on a schedule (e.g. cron). It checks for schema drift, adds or removes dictionary rows, describes new columns, and embeds only new or changed rows. It stops at the first failure.
+
+If the schema changed, `make refresh` exits 1 and logs the changes. After reviewing them, record the new baseline and run it again:
 
 ```bash
-medallion-schema-drift
+venv/bin/medallion-schema-drift --accept
+make refresh
 ```
 
-It exits 1 when the schema differs from the saved baseline, and `medallion-index` runs the same check first and refuses to rebuild. After reviewing the logged changes, record the new baseline:
+**Run a single step**
 
-```bash
-medallion-schema-drift --accept
-```
+With `venv` activated, from the repo root: `medallion-schema-drift`, `medallion-describe [--dry-run]`, `medallion-index` or `medallion-chat`.
+
+If you create your own environment in an iCloud-synced folder on macOS, name it `venv`, not `.venv`. iCloud flags dot-folders as hidden, and recent Python versions skip hidden `.pth` files, which breaks the editable install.
 
 ## Development
 
@@ -96,6 +97,4 @@ Python · Databricks SQL · MCP (Model Context Protocol) · Anthropic API · Voy
 
 ## Possible extensions
 
-- **Automate the schema-change hook.** [`hooks/detect_schema_change.py`](src/medallion_rag/hooks/detect_schema_change.py) is built and verified end-to-end against real schema changes (column add + drop), but it's intentionally manual/cron-triggered rather than wired to auto-run `build_index.py` — a deliberate scoping choice for this project rather than a limitation of the detection logic itself.
-- Incremental re-embedding (only changed rows) instead of a full rebuild.
 - Multi-turn conversational memory in the chatbot (currently each question is answered independently of prior turns' retrieval).
