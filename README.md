@@ -1,6 +1,6 @@
 # Medallion Architecture Data Dictionary RAG
 
-An AI + Analytics Engineering integration project: a RAG chatbot that auto-generates and answers questions about a data dictionary over a Databricks Medallion (Bronze/Silver/Gold) lakehouse. A Claude-powered subagent inspects table/column metadata via a custom MCP server and drafts human-readable descriptions, which are embedded with Voyage AI into ChromaDB and served through a Streamlit chatbot that retrieves relevant entries and answers in natural language via the Anthropic API.
+An AI + Analytics Engineering integration project: a RAG chatbot that auto-generates and answers questions about a data dictionary over a Databricks Medallion (Bronze/Silver/Gold) lakehouse. A Claude-powered subagent inspects table/column metadata via a custom MCP server and drafts human-readable descriptions. Once a person approves them, they're embedded with Voyage AI into ChromaDB and served through a Streamlit chatbot that retrieves relevant entries and answers in natural language via the Anthropic API.
 
 ## Problem
 
@@ -76,7 +76,9 @@ flowchart LR
 
 ![The medallion lakehouse in Databricks (Unity Catalog, 1_bronze/2_silver/3_gold)](docs/lakehouse-catalog.png)
 
-![Auto-generated data dictionary — 80 columns documented automatically via Claude](docs/data-dictionary-populated.png)
+![The data dictionary as first generated: 80 draft descriptions, source auto-generated, no embedding IDs](docs/data-dictionary-populated.png)
+
+The screenshot above shows the first generated drafts. Since then, 74 of the descriptions have been corrected, and all 80 rows are approved and indexed.
 
 All code lives under [`src/medallion_rag/`](src/medallion_rag):
 
