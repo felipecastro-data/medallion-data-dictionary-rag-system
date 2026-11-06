@@ -7,7 +7,13 @@ the server's tools work end to end against the live lakehouse_demo catalog.
 from __future__ import annotations
 
 from medallion_rag.mcp_server.db import DatabricksConnectionError
-from medallion_rag.mcp_server.server import get_sample_rows, get_schema, list_tables, search_metadata
+from medallion_rag.mcp_server.server import (
+    get_column_lineage,
+    get_sample_rows,
+    get_schema,
+    list_tables,
+    search_metadata,
+)
 
 
 def main() -> None:
@@ -39,6 +45,12 @@ def main() -> None:
         print(f"  {len(matches)} match(es)")
         for row in matches[:5]:
             print(f"  {row['table_name']}.{row['column_name']}")
+
+        print("\n=== get_column_lineage('customer_ltv', '3_gold') ===")
+        lineage = get_column_lineage("customer_ltv", "3_gold")
+        for row in lineage:
+            print(f"  {row['column_name']:<24} <- {', '.join(row['derived_from'])}")
+        assert lineage, "No lineage found for customer_ltv!"
 
         print("\nAll tools executed successfully.")
 
