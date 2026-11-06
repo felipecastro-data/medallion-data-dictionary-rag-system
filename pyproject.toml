@@ -20,6 +20,7 @@ medallion-chat = "medallion_rag.chatbot.cli:main"
 medallion-schema-drift = "medallion_rag.hooks.detect_schema_change:main"
 medallion-approve = "medallion_rag.subagents.governance:approve_main"
 medallion-comments = "medallion_rag.subagents.governance:comments_main"
+medallion-eval = "medallion_rag.evaluation.run_eval:main"
 
 [tool.setuptools.dynamic]
 dependencies = { file = ["requirements.txt"] }

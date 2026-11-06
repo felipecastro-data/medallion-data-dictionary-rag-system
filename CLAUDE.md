@@ -73,6 +73,8 @@ Code lives in the installable package `src/medallion_rag/` (`pip install -e .`):
   ChromaDB and answers user questions via the Anthropic API.
 - **`hooks/`** — Automation hooks (e.g., regenerate embeddings when the dictionary
   changes).
+- **`evaluation/`** — Measures the figures the README states, using the fixed questions in
+  `eval/`. It generates no stored descriptions and never touches the live index.
 
 Supplementary documentation (architecture notes, setup guides) lives in `/docs`.
 
