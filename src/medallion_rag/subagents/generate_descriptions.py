@@ -231,7 +231,11 @@ def generate_description_with_guardrail(
     data_type: str,
     sample_values: list[str],
 ) -> str:
-    """Generate a description, retrying once for bronze STRING columns that trip the banned-phrase filter."""
+    """Generate a description, retrying once for bronze STRING columns that trip the banned-phrase filter.
+
+    Raises ValueError if the retry is also banned, so the text is never stored. The row stays
+    pending, the run reports a failure, and the next run tries again.
+    """
     description = generate_description(
         client,
         table_name=table_name,
@@ -267,9 +271,7 @@ def generate_description_with_guardrail(
 
     still_banned = find_banned_phrase(retried_description)
     if still_banned is not None:
-        logger.warning(
-            "%s: retry still contains '%s', flagging for manual review.", column_name, still_banned
-        )
+        raise ValueError(f"retry still contains banned phrase '{still_banned}'")
 
     return retried_description
 
