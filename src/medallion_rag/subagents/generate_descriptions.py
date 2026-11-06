@@ -1,8 +1,9 @@
 """Subagent that populates lakehouse_demo.3_gold.data_dictionary with column descriptions.
 
-For each (table_name, column_name) row in data_dictionary that has no description yet,
-this gathers schema and sample-value context for that column via the MCP server's tools,
-asks the Anthropic API for a concise business-relevant description, and writes it back.
+First syncs data_dictionary with the lakehouse, adding rows for new columns and deleting rows
+for dropped ones. Then, for each row that has no description yet, this gathers schema and
+sample-value context for that column via the MCP server's tools, asks the Anthropic API for a
+concise business-relevant description, and writes it back.
 
 Usage:
     medallion-describe [--dry-run]
@@ -22,6 +23,7 @@ from datetime import datetime, timezone
 from anthropic import Anthropic
 from dotenv import load_dotenv
 
+from medallion_rag.hooks.detect_schema_change import fetch_current_columns
 from medallion_rag.logging_config import configure_logging
 from medallion_rag.mcp_server.db import ALLOWED_TABLES, METADATA_TABLE, run_query
 from medallion_rag.mcp_server.server import get_sample_rows, get_schema
@@ -292,12 +294,53 @@ def write_description(table_name: str, column_name: str, description: str) -> No
     )
 
 
-def run(dry_run: bool) -> None:
-    """Generate (and optionally write) descriptions for every pending data_dictionary row."""
+def sync_dictionary_rows(dry_run: bool) -> None:
+    """Add data_dictionary rows for new lakehouse columns and delete rows for dropped ones.
+
+    Rows for tables outside ALLOWED_TABLES are left alone. An empty schema result raises rather
+    than being read as "every column was dropped", which would delete every description.
+    """
+    current = {tuple(key.split(".")[1:]) for key in fetch_current_columns()}
+    if not current:
+        raise RuntimeError("No lakehouse columns found; refusing to sync data_dictionary.")
+
+    rows = run_query(f"SELECT table_name, column_name FROM {METADATA_TABLE}")
+    existing = {
+        (row["table_name"], row["column_name"]) for row in rows if row["table_name"] in TABLE_TO_SCHEMA
+    }
+    to_add = sorted(current - existing)
+    to_delete = sorted(existing - current)
+
+    for table_name, column_name in to_add:
+        logger.info("New column: %s.%s", table_name, column_name)
+    for table_name, column_name in to_delete:
+        logger.info("Dropped column: %s.%s", table_name, column_name)
+
+    if dry_run:
+        logger.info("Dry run: would add %d row(s) and delete %d.", len(to_add), len(to_delete))
+        return
+
+    for table_name, column_name in to_add:
+        run_query(
+            f"INSERT INTO {METADATA_TABLE} (table_name, column_name) VALUES (:table_name, :column_name)",
+            {"table_name": table_name, "column_name": column_name},
+        )
+    for table_name, column_name in to_delete:
+        run_query(
+            f"DELETE FROM {METADATA_TABLE} WHERE table_name = :table_name AND column_name = :column_name",
+            {"table_name": table_name, "column_name": column_name},
+        )
+    logger.info("Synced data_dictionary: added %d row(s), deleted %d.", len(to_add), len(to_delete))
+
+
+def run(dry_run: bool) -> int:
+    """Sync dictionary rows, then describe every pending row. Returns 1 if any row failed."""
+    sync_dictionary_rows(dry_run)
+
     pending_rows = fetch_pending_rows()
     if not pending_rows:
         logger.info("Run complete: no rows need descriptions.")
-        return
+        return 0
 
     grouped = group_by_table(pending_rows)
     client = Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
@@ -355,9 +398,10 @@ def run(dry_run: bool) -> None:
         total_failed,
         " (dry run, nothing written)" if dry_run else "",
     )
+    return 1 if total_failed else 0
 
 
-def main() -> None:
+def main() -> int:
     """CLI entry point."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -367,8 +411,8 @@ def main() -> None:
     )
     args = parser.parse_args()
     configure_logging()
-    run(dry_run=args.dry_run)
+    return run(dry_run=args.dry_run)
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
