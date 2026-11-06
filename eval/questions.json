@@ -1,0 +1,37 @@
+[
+  {"id": "D01", "category": "direct", "question": "Which column tells me how much a customer has spent over their whole history?", "expected": ["customer_ltv.lifetime_revenue"], "match": "any", "answer_must": "Names customer_ltv.lifetime_revenue."},
+  {"id": "D02", "category": "direct", "question": "How long was a customer active between their first and latest purchase?", "expected": ["customer_ltv.customer_tenure_days"], "match": "any", "answer_must": "Names customer_ltv.customer_tenure_days."},
+  {"id": "D03", "category": "direct", "question": "Where can I find how many orders were placed each day?", "expected": ["daily_sales_summary.order_count"], "match": "any", "answer_must": "Names daily_sales_summary.order_count."},
+  {"id": "D04", "category": "direct", "question": "What is a line worth once the discount has been taken off?", "expected": ["order_items.net_amount"], "match": "any", "answer_must": "Names order_items.net_amount."},
+  {"id": "D05", "category": "direct", "question": "Which column has a line item's price before any discount?", "expected": ["order_items.extended_price", "raw_lineitem.l_extendedprice"], "match": "any", "answer_must": "Names order_items.extended_price or raw_lineitem.l_extendedprice."},
+  {"id": "D06", "category": "direct", "question": "How was an item sent, for example by air or by truck?", "expected": ["raw_lineitem.l_shipmode"], "match": "any", "answer_must": "Names raw_lineitem.l_shipmode."},
+  {"id": "D07", "category": "direct", "question": "Which column says whether a line item was returned?", "expected": ["raw_lineitem.l_returnflag"], "match": "any", "answer_must": "Names raw_lineitem.l_returnflag."},
+  {"id": "D08", "category": "direct", "question": "Who processed an order?", "expected": ["orders.clerk", "raw_orders.o_clerk"], "match": "any", "answer_must": "Names orders.clerk or raw_orders.o_clerk."},
+  {"id": "D09", "category": "direct", "question": "What date was a line item committed to?", "expected": ["raw_lineitem.l_commitdate"], "match": "any", "answer_must": "Names raw_lineitem.l_commitdate."},
+  {"id": "D10", "category": "direct", "question": "When did a line item actually arrive?", "expected": ["raw_lineitem.l_receiptdate"], "match": "any", "answer_must": "Names raw_lineitem.l_receiptdate."},
+  {"id": "D11", "category": "direct", "question": "Where is a customer's phone number stored?", "expected": ["customers.phone", "raw_customers.c_phone"], "match": "any", "answer_must": "Names customers.phone or raw_customers.c_phone."},
+  {"id": "D12", "category": "direct", "question": "Which column shows what country a customer is in?", "expected": ["customers.nation_key", "raw_customers.c_nationkey"], "match": "any", "answer_must": "Names customers.nation_key or raw_customers.c_nationkey, and doesn't invent a country name column."},
+  {"id": "D13", "category": "direct", "question": "What tax rate was charged on an order line?", "expected": ["order_items.tax", "raw_lineitem.l_tax"], "match": "any", "answer_must": "Names order_items.tax or raw_lineitem.l_tax."},
+  {"id": "D14", "category": "direct", "question": "How do I find who supplied a line item?", "expected": ["raw_lineitem.l_suppkey"], "match": "any", "answer_must": "Names raw_lineitem.l_suppkey."},
+  {"id": "D15", "category": "direct", "question": "When was a record loaded into the lakehouse?", "expected": ["raw_customers._ingested_at", "raw_orders._ingested_at", "raw_lineitem._ingested_at"], "match": "any", "answer_must": "Names an _ingested_at column."},
+  {"id": "D16", "category": "direct", "question": "Can I see how much money a customer has on their account?", "expected": ["customers.account_balance", "raw_customers.c_acctbal"], "match": "any", "answer_must": "Names customers.account_balance or raw_customers.c_acctbal."},
+
+  {"id": "T01", "category": "layer_tie", "question": "What does order priority mean?", "expected": ["orders.order_priority", "raw_orders.o_orderpriority"], "match": "all", "answer_must": "Mentions both layers."},
+  {"id": "T02", "category": "layer_tie", "question": "What is a customer's market segment?", "expected": ["customers.market_segment", "raw_customers.c_mktsegment"], "match": "all", "answer_must": "Mentions both layers."},
+  {"id": "T03", "category": "layer_tie", "question": "How do I find an order's status?", "expected": ["orders.order_status", "raw_orders.o_orderstatus"], "match": "all", "answer_must": "Mentions both layers."},
+  {"id": "T04", "category": "layer_tie", "question": "What is average order value?", "expected": ["customer_ltv.avg_order_value", "daily_sales_summary.avg_order_value"], "match": "all", "answer_must": "Separates the per-customer and per-day versions."},
+  {"id": "T05", "category": "layer_tie", "question": "When was an order placed?", "expected": ["orders.order_date", "raw_orders.o_orderdate"], "match": "all", "answer_must": "Mentions both layers."},
+
+  {"id": "L01", "category": "lineage", "question": "Where does the phone number in the cleaned customers table come from?", "expected": ["customers.phone"], "match": "any", "answer_must": "Says raw_customers.c_phone."},
+  {"id": "L02", "category": "lineage", "question": "Which upstream columns feed the net amount of an order item?", "expected": ["order_items.net_amount"], "match": "any", "answer_must": "Says raw_lineitem.l_discount and raw_lineitem.l_extendedprice."},
+  {"id": "L03", "category": "lineage", "question": "What is a customer's lifetime revenue derived from?", "expected": ["customer_ltv.lifetime_revenue"], "match": "any", "answer_must": "Says order_items.net_amount."},
+  {"id": "L04", "category": "lineage", "question": "What is the source of the market segment in the orders table?", "expected": ["orders.market_segment"], "match": "any", "answer_must": "Says raw_customers.c_mktsegment, not raw_orders."},
+  {"id": "L05", "category": "lineage", "question": "Where does the daily total revenue come from?", "expected": ["daily_sales_summary.total_revenue"], "match": "any", "answer_must": "Says order_items.net_amount."},
+
+  {"id": "N01", "category": "not_in_dictionary", "question": "Which column stores a customer's email address?", "expected": [], "match": "none", "answer_must": "Says the dictionary has no such column."},
+  {"id": "N02", "category": "not_in_dictionary", "question": "Which column has a product's brand name?", "expected": [], "match": "none", "answer_must": "Says the dictionary has no such column."},
+  {"id": "N03", "category": "not_in_dictionary", "question": "Which warehouse did a shipment leave from?", "expected": [], "match": "none", "answer_must": "Says the dictionary has no such column."},
+  {"id": "N04", "category": "not_in_dictionary", "question": "What does order status P mean?", "expected": [], "match": "none", "answer_must": "Says the dictionary lists P but doesn't define it, with no guess."},
+  {"id": "N05", "category": "not_in_dictionary", "question": "Which column shows a sales rep's commission?", "expected": [], "match": "none", "answer_must": "Says the dictionary has no such column."},
+  {"id": "N06", "category": "not_in_dictionary", "question": "What currency are prices stored in?", "expected": [], "match": "none", "answer_must": "Says the dictionary doesn't state a currency."}
+]
