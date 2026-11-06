@@ -7,13 +7,14 @@ asks the Anthropic API for a concise business-relevant description, and writes i
 Usage:
     medallion-describe [--dry-run]
 
---dry-run prints the generated descriptions without writing to Databricks, so output
+--dry-run logs the generated descriptions without writing to Databricks, so output
 quality can be reviewed before committing writes.
 """
 
 from __future__ import annotations
 
 import argparse
+import logging
 import os
 from collections import defaultdict
 from datetime import datetime, timezone
@@ -21,10 +22,13 @@ from datetime import datetime, timezone
 from anthropic import Anthropic
 from dotenv import load_dotenv
 
+from medallion_rag.logging_config import configure_logging
 from medallion_rag.mcp_server.db import ALLOWED_TABLES, METADATA_TABLE, run_query
 from medallion_rag.mcp_server.server import get_sample_rows, get_schema
 
 load_dotenv()
+
+logger = logging.getLogger(__name__)
 
 MODEL = "claude-haiku-4-5-20251001"
 MAX_SAMPLE_VALUES = 5
@@ -242,7 +246,7 @@ def generate_description_with_guardrail(
     if banned_phrase is None:
         return description
 
-    print(f"  {column_name:<24} [guardrail] tripped on '{banned_phrase}', retrying once...")
+    logger.info("%s: guardrail tripped on '%s', retrying once.", column_name, banned_phrase)
     corrective_prompt = build_corrective_prompt(
         table_name=table_name,
         schema=schema,
@@ -261,9 +265,8 @@ def generate_description_with_guardrail(
 
     still_banned = find_banned_phrase(retried_description)
     if still_banned is not None:
-        print(
-            f"  {column_name:<24} [guardrail] WARNING: retry still contains '{still_banned}' "
-            "— flagging for manual review."
+        logger.warning(
+            "%s: retry still contains '%s', flagging for manual review.", column_name, still_banned
         )
 
     return retried_description
@@ -293,7 +296,7 @@ def run(dry_run: bool) -> None:
     """Generate (and optionally write) descriptions for every pending data_dictionary row."""
     pending_rows = fetch_pending_rows()
     if not pending_rows:
-        print("No rows need descriptions (data_dictionary.description already populated).")
+        logger.info("Run complete: no rows need descriptions.")
         return
 
     grouped = group_by_table(pending_rows)
@@ -301,14 +304,15 @@ def run(dry_run: bool) -> None:
 
     total_generated = 0
     total_written = 0
+    total_failed = 0
 
     for table_name, column_names in grouped.items():
         schema = TABLE_TO_SCHEMA.get(table_name)
         if schema is None:
-            print(f"  SKIPPING '{table_name}': not a recognized lakehouse table, skipping.")
+            logger.warning("Skipping '%s': not a recognized lakehouse table.", table_name)
             continue
 
-        print(f"\n=== {table_name} ({schema}) ===")
+        logger.info("Describing %s (%s)", table_name, schema)
 
         # One MCP call each for schema and sample rows per table, not per column.
         columns_schema = {row["column_name"]: row["data_type"] for row in get_schema(table_name, schema)}
@@ -328,24 +332,29 @@ def run(dry_run: bool) -> None:
                     sample_values=sample_values,
                 )
             except Exception as exc:
-                print(f"  {column_name:<24} FAILED to generate description: {exc}")
+                logger.error("%s: failed to generate description: %s", column_name, exc)
+                total_failed += 1
                 continue
 
             total_generated += 1
-            print(f"  {column_name:<24} {description}")
+            logger.info("%s: %s", column_name, description)
 
             if not dry_run:
                 try:
                     write_description(table_name, column_name, description)
                     total_written += 1
                 except Exception as exc:
-                    print(f"  {column_name:<24} FAILED to write to Databricks: {exc}")
+                    logger.error("%s: failed to write to Databricks: %s", column_name, exc)
+                    total_failed += 1
 
-    print(f"\nGenerated {total_generated} description(s).")
-    if dry_run:
-        print("Dry run: nothing was written to Databricks. Re-run without --dry-run to commit.")
-    else:
-        print(f"Wrote {total_written} description(s) to {METADATA_TABLE}.")
+    logger.info(
+        "Run complete: described %d row(s), wrote %d to %s, %d failed%s.",
+        total_generated,
+        total_written,
+        METADATA_TABLE,
+        total_failed,
+        " (dry run, nothing written)" if dry_run else "",
+    )
 
 
 def main() -> None:
@@ -354,9 +363,10 @@ def main() -> None:
     parser.add_argument(
         "--dry-run",
         action="store_true",
-        help="Print generated descriptions without writing them to Databricks.",
+        help="Log generated descriptions without writing them to Databricks.",
     )
     args = parser.parse_args()
+    configure_logging()
     run(dry_run=args.dry_run)
 
 
