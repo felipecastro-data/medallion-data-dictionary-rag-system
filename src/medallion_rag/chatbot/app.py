@@ -70,7 +70,10 @@ def format_context(results: list[dict[str, str | float]]) -> str:
     lines = []
     for r in results:
         layer = LAYER_LABELS.get(TABLE_TO_SCHEMA.get(r["table_name"], ""), "unknown layer")
-        lines.append(f"- {r['table_name']}.{r['column_name']} ({layer}): {r['description']}")
+        line = f"- {r['table_name']}.{r['column_name']} ({layer}): {r['description']}"
+        if r["derived_from"]:
+            line += f" Derived from: {r['derived_from']}."
+        lines.append(line)
     return "\n".join(lines)
 
 

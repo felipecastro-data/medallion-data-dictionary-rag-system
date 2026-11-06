@@ -26,6 +26,7 @@ def voyage(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> MagicMock:
     monkeypatch.setenv("VOYAGE_API_KEY", "test-key")
     monkeypatch.setattr(build_index, "CHROMA_DB_PATH", str(tmp_path / "chroma"))
     monkeypatch.setattr(build_index, "run_query", MagicMock(return_value=[]))
+    monkeypatch.setattr(build_index, "fetch_column_lineage", dict)
     return client
 
 
@@ -66,6 +67,22 @@ def test_only_new_and_changed_rows_are_embedded_and_stale_rows_removed(
 
     assert voyage.embed.call_args.args[0] == ["orders.edited: New.", "orders.added: Brand new."]
     assert indexed_ids() == ["orders.added", "orders.edited", "orders.kept"]
+
+
+def test_lineage_updates_without_embedding_again(voyage: MagicMock, monkeypatch: pytest.MonkeyPatch) -> None:
+    """A new upstream column reaches the index without a paid re-embed of the row."""
+    rows = [row("clerk", "Clerk.")]
+    index(rows, monkeypatch)
+    voyage.embed.reset_mock()
+    lineage = {("orders", "clerk"): ["1_bronze.raw_orders.o_clerk", "1_bronze.raw_orders.o_other"]}
+    monkeypatch.setattr(build_index, "fetch_column_lineage", lambda: lineage)
+
+    index(rows, monkeypatch)
+
+    voyage.embed.assert_not_called()
+    client = chromadb.PersistentClient(path=build_index.CHROMA_DB_PATH)
+    stored = client.get_collection(build_index.COLLECTION_NAME).get(ids=["orders.clerk"])["metadatas"][0]
+    assert stored["derived_from"] == "1_bronze.raw_orders.o_clerk, 1_bronze.raw_orders.o_other"
 
 
 def test_embedding_ids_are_recorded_after_indexing(

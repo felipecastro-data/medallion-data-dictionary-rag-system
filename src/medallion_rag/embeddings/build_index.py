@@ -22,6 +22,7 @@ from dotenv import load_dotenv
 from medallion_rag.hooks.detect_schema_change import run as check_schema_drift
 from medallion_rag.logging_config import configure_logging
 from medallion_rag.mcp_server.db import METADATA_TABLE, run_query
+from medallion_rag.mcp_server.lineage import fetch_column_lineage
 
 load_dotenv()
 
@@ -73,9 +74,19 @@ def run() -> None:
         logger.warning("No rows with a description found in %s.", METADATA_TABLE)
         return
 
+    lineage = fetch_column_lineage()
     rows_by_id = {f"{row['table_name']}.{row['column_name']}": row for row in rows}
     documents = {
         entry_id: build_embedding_input(row["table_name"], row["column_name"], row["description"])
+        for entry_id, row in rows_by_id.items()
+    }
+    metadatas = {
+        entry_id: {
+            "table_name": row["table_name"],
+            "column_name": row["column_name"],
+            "description": row["description"],
+            "derived_from": ", ".join(lineage.get((row["table_name"], row["column_name"]), [])),
+        }
         for entry_id, row in rows_by_id.items()
     }
 
@@ -95,15 +106,14 @@ def run() -> None:
             ids=changed_ids,
             embeddings=embed_documents(voyage_client, changed_documents),
             documents=changed_documents,
-            metadatas=[
-                {
-                    "table_name": rows_by_id[entry_id]["table_name"],
-                    "column_name": rows_by_id[entry_id]["column_name"],
-                    "description": rows_by_id[entry_id]["description"],
-                }
-                for entry_id in changed_ids
-            ],
+            metadatas=[metadatas[entry_id] for entry_id in changed_ids],
         )
+
+    # Lineage is not embedded, so it can change without a paid re-embed of the row.
+    unchanged_ids = [entry_id for entry_id in documents if entry_id not in changed_ids]
+    if unchanged_ids:
+        collection.update(ids=unchanged_ids, metadatas=[metadatas[entry_id] for entry_id in unchanged_ids])
+
     if stale_ids:
         collection.delete(ids=stale_ids)
 
@@ -112,7 +122,7 @@ def run() -> None:
         "Run complete: embedded %d row(s), removed %d, left %d unchanged.",
         len(changed_ids),
         len(stale_ids),
-        len(documents) - len(changed_ids),
+        len(unchanged_ids),
     )
 
 
