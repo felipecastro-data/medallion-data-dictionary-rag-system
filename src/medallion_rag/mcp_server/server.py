@@ -19,6 +19,7 @@ from medallion_rag.mcp_server.db import (
     validate_schema,
     validate_table,
 )
+from medallion_rag.mcp_server.lineage import fetch_column_lineage
 
 mcp = FastMCP("medallion-data-dictionary")
 
@@ -90,6 +91,26 @@ def get_sample_rows(table_name: str, schema: str, limit: int = 10) -> list[dict[
     # interpolate them as identifiers here (identifiers cannot be bound as SQL parameters).
     query = f"SELECT * FROM `{CATALOG}`.`{schema}`.`{table_name}` LIMIT {capped_limit}"
     return run_query(query)
+
+
+@mcp.tool()
+def get_column_lineage(table_name: str, schema: str) -> list[dict[str, Any]]:
+    """Get the upstream columns each column of a table is derived from.
+
+    Args:
+        table_name: Table to look up, e.g. "customer_ltv".
+        schema: One of "1_bronze", "2_silver", "3_gold".
+
+    Returns:
+        Rows with "column_name" and "derived_from" (a list of source columns). Columns with no
+        source column, such as ingestion metadata, are omitted.
+    """
+    validate_table(schema, table_name)
+    return [
+        {"column_name": column_name, "derived_from": sources}
+        for (target_table, column_name), sources in fetch_column_lineage().items()
+        if target_table == table_name
+    ]
 
 
 @mcp.tool()
