@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from medallion_rag.chatbot.app import NEAR_TIE_THRESHOLD, near_tie_instruction
+from medallion_rag.chatbot.app import NEAR_TIE_THRESHOLD, format_context, near_tie_instruction
 
 BRONZE = {"table_name": "raw_orders", "column_name": "o_orderpriority", "description": "Raw priority."}
 SILVER = {"table_name": "orders", "column_name": "order_priority", "description": "Clean priority."}
@@ -16,6 +16,19 @@ UNKNOWN = {"table_name": "not_in_lakehouse", "column_name": "mystery", "descript
 def ranked(first: dict[str, str], second: dict[str, str], gap: float = 0.01) -> list[dict[str, str | float]]:
     """Build two retrieval results, closest first, separated by a distance gap."""
     return [{**first, "distance": 0.5}, {**second, "distance": 0.5 + gap}]
+
+
+def test_context_includes_lineage_only_when_known() -> None:
+    """The model can answer lineage questions, and sees no empty lineage clause otherwise."""
+    context = format_context(
+        [
+            {**SILVER, "derived_from": "1_bronze.raw_orders.o_orderpriority"},
+            {**BRONZE, "derived_from": ""},
+        ]
+    )
+
+    assert "Clean priority. Derived from: 1_bronze.raw_orders.o_orderpriority." in context
+    assert context.count("Derived from") == 1
 
 
 def test_single_result_has_nothing_to_tie_with() -> None:

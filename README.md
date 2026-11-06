@@ -27,7 +27,7 @@ flowchart LR
 All code lives under [`src/medallion_rag/`](src/medallion_rag):
 
 - [`mcp_server/`](src/medallion_rag/mcp_server) — MCP server exposing schema inspection and LIMIT-guarded query tools over the lakehouse.
-- [`subagents/`](src/medallion_rag/subagents) — Reads table/column metadata via MCP, drafts descriptions with Claude, writes them back to `data_dictionary`.
+- [`subagents/`](src/medallion_rag/subagents) — Reads table/column metadata via MCP, drafts descriptions with Claude, writes them back to `data_dictionary`, and publishes approved ones as Unity Catalog column comments with their lineage.
 - [`embeddings/`](src/medallion_rag/embeddings) — Embeds dictionary entries with Voyage AI and indexes them in ChromaDB.
 - [`chatbot/`](src/medallion_rag/chatbot) — Streamlit chat UI; retrieves from ChromaDB and answers via the Anthropic API.
 - [`hooks/`](src/medallion_rag/hooks) — Schema drift check that blocks re-indexing until a change is reviewed.
@@ -38,7 +38,7 @@ All code lives under [`src/medallion_rag/`](src/medallion_rag):
 
 - **Programmatic guardrail against LLM fabrication.** Prompt wording alone didn't stop the model from inventing plausible-sounding but unevidenced claims — e.g. calling a plain bronze STRING column "encoded" or "hashed" with no such pattern in the sample values. A banned-phrase filter catches this on bronze string columns and triggers one corrective retry with the offending phrase named explicitly. ([`subagents/generate_descriptions.py`](src/medallion_rag/subagents/generate_descriptions.py#L165-L274))
 
-- **Retrieval-aware answer logic, not "newest layer wins."** When the top two ChromaDB matches are near-tied, the chatbot distinguishes *why* they're tied before deciding how to answer: raw-vs-cleaned pairs (bronze/silver) get a "here's both, but use the cleaned one" answer, while a general column tied with a purpose-built Gold aggregate gets "here's both, scoped differently — you decide," since a Gold aggregate isn't simply a more-refined version of the same thing. ([`chatbot/app.py`](src/medallion_rag/chatbot/app.py#L77-L132))
+- **Retrieval-aware answer logic, not "newest layer wins."** When the top two ChromaDB matches are near-tied, the chatbot distinguishes *why* they're tied before deciding how to answer: raw-vs-cleaned pairs (bronze/silver) get a "here's both, but use the cleaned one" answer, while a general column tied with a purpose-built Gold aggregate gets "here's both, scoped differently — you decide," since a Gold aggregate isn't simply a more-refined version of the same thing. ([`chatbot/app.py`](src/medallion_rag/chatbot/app.py#L80-L135))
 
 ## Setup
 
@@ -69,6 +69,17 @@ If the schema changed, `make refresh` exits 1 and logs the changes. After review
 ```bash
 venv/bin/medallion-schema-drift --accept
 make refresh
+```
+
+**Approve descriptions**
+
+Generated descriptions stay drafts until someone reviews them. Only approved ones are published as Unity Catalog column comments, each followed by the upstream columns from `system.access.column_lineage`:
+
+```bash
+venv/bin/medallion-approve                    # list descriptions awaiting approval
+venv/bin/medallion-approve orders.clerk       # approve specific columns (or --all)
+venv/bin/medallion-comments --dry-run         # preview the comments
+venv/bin/medallion-comments                   # publish them (make refresh also does this)
 ```
 
 **Run a single step**

@@ -26,8 +26,8 @@ def retrieve(question: str, top_k: int = 5) -> list[dict[str, str | float]]:
         top_k: Maximum number of matches to return.
 
     Returns:
-        Records with table_name, column_name, description, and distance (lower is a
-        closer match), ordered by increasing distance.
+        Records with table_name, column_name, description, derived_from (upstream columns,
+        empty if none), and distance (lower is a closer match), ordered by increasing distance.
     """
     voyage_client = voyageai.Client(api_key=os.environ["VOYAGE_API_KEY"])
     query_embedding = voyage_client.embed(
@@ -45,6 +45,7 @@ def retrieve(question: str, top_k: int = 5) -> list[dict[str, str | float]]:
             "table_name": metadata["table_name"],
             "column_name": metadata["column_name"],
             "description": metadata["description"],
+            "derived_from": metadata["derived_from"],
             "distance": distance,
         }
         for metadata, distance in zip(metadatas, distances, strict=True)
