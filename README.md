@@ -2,6 +2,58 @@
 
 An AI + Analytics Engineering integration project: a RAG chatbot that auto-generates and answers questions about a data dictionary over a Databricks Medallion (Bronze/Silver/Gold) lakehouse. A Claude-powered subagent inspects table/column metadata via a custom MCP server and drafts human-readable descriptions, which are embedded with Voyage AI into ChromaDB and served through a Streamlit chatbot that retrieves relevant entries and answers in natural language via the Anthropic API.
 
+## Problem
+
+A medallion lakehouse stores the same business concept several times: `c_mktsegment` in bronze, `market_segment` in silver, and `market_segment` again in a gold aggregate. The schema doesn't say what a column means, which layer to use, or where it came from, so analysts ask a colleague or read the transformation code. Hand-written dictionaries take effort and go stale when the schema changes.
+
+Generating the dictionary with an LLM removes the effort but adds a new risk: the model states plausible details the data doesn't show. In this project, 74 of the 80 generated descriptions were corrected during review. So generation is only the first step: drafts need a person's approval before they're published, schema changes stop re-indexing until someone reviews them, and answers are measured against a fixed question set.
+
+## Results
+
+Measured on 2026-11-06 with [`medallion-eval`](src/medallion_rag/evaluation/run_eval.py). The [questions](eval/questions.json), [raw results and answers](eval/results.json), and [answer grades](eval/answer_grades.json) are all in the repo.
+
+**Source data.** The lakehouse is built from the public `samples.tpch` tables `customer`, `orders` and `lineitem`, with order dates from 1992-01-01 to 1998-08-02.
+
+| Layer | Tables | Columns | Rows |
+|---|---|---:|---:|
+| Bronze | `raw_customers`, `raw_orders`, `raw_lineitem` | 39 | 38,249,795 |
+| Silver | `customers`, `orders`, `order_items` | 27 | 38,249,795 |
+| Gold | `daily_sales_summary`, `customer_ltv` | 14 | 502,395 |
+
+**Retrieval accuracy.** 26 of the 32 questions have an expected column. The other 6 ask about things the dictionary doesn't contain, so they're only scored on the answer.
+
+| Question type | Questions | Expected column ranked first | Expected column in top 5 |
+|---|---:|---:|---:|
+| One concept | 16 | 14 | 16 |
+| Same concept in two places (all must be in the top 5) | 5 | 4 | 5 |
+| Lineage | 5 | 4 | 5 |
+| **Total** | **26** | **22 (85%)** | **26 (100%)** |
+
+**Answer quality.** All 32 answers met their written criterion, including the 5 lineage questions and the 6 questions the dictionary can't answer. However, **10 of the 32 answers also added a detail the dictionary doesn't support**. For example, one answer gave meanings for the order status codes, which the dictionary doesn't define, and another claimed silver has a receipt date column, which it doesn't. This is a known limitation and hasn't been fixed. A reader should check any answer's sources, which the chatbot shows below each reply.
+
+**Time and cost**
+
+| Measure | Result |
+|---|---|
+| Description generation | 106.8 s for 80 columns (1.33 s per column) |
+| Generation cost | $0.054 in total, $0.00068 per column (470 input and 41 output tokens on average) |
+| Full index build | 7.4 s, $0.00016 (2,595 Voyage tokens) |
+| Index re-run with nothing changed | 4.6 s, no embedding cost |
+| Median answer latency | 2.29 s (slowest 3.40 s) |
+| Cost per question | $0.0012 (543 input, 128 output and 9 Voyage tokens on average) |
+
+**How to read these numbers**
+
+- The question set is small, and its author had read the descriptions first, so scores may run high. It's a regression check, not an estimate of accuracy on new questions.
+- Answers were graded by Claude Code, the AI assistant that ran the evaluation. The project owner approved the questions and criteria beforehand, but hasn't independently graded the answers.
+- Costs use list prices on the measurement date: Claude Haiku 4.5 at $1 per million input tokens and $5 per million output tokens, and Voyage `voyage-3.5` at $0.06 per million tokens. Any free allowance isn't counted.
+- Generation time covers model calls and sample reads, but not the database write for each row. Row counts come from an earlier check of the tables, not this run.
+- Latency comes from one run on one laptop, with calls spaced 21 seconds apart. On Voyage's free tier of 3 requests a minute, a burst of questions can wait up to about a minute. The chatbot's own rendering time isn't included.
+
+To reproduce these numbers, run `venv/bin/medallion-eval`. It takes about 15 minutes and costs about $0.09. It doesn't change the lakehouse or the local index, but it does overwrite `eval/results.json`, and the answers then need grading again.
+
+Decisions and limits are written up in the [design doc](docs/design.md) and the ADRs on [ChromaDB vs Databricks Vector Search](docs/adr/0001-chromadb-vs-databricks-vector-search.md), the [banned-phrase filter](docs/adr/0002-banned-phrase-filter-vs-prompt-only.md), and the [schema-change hook](docs/adr/0003-manual-schema-hook-vs-auto-rebuild.md).
+
 ## Architecture
 
 ```mermaid
@@ -31,6 +83,7 @@ All code lives under [`src/medallion_rag/`](src/medallion_rag):
 - [`embeddings/`](src/medallion_rag/embeddings) — Embeds dictionary entries with Voyage AI and indexes them in ChromaDB.
 - [`chatbot/`](src/medallion_rag/chatbot) — Streamlit chat UI; retrieves from ChromaDB and answers via the Anthropic API.
 - [`hooks/`](src/medallion_rag/hooks) — Schema drift check that blocks re-indexing until a change is reviewed.
+- [`evaluation/`](src/medallion_rag/evaluation) — Measures retrieval accuracy, latency, build time and cost against the fixed questions in [`eval/`](eval).
 
 ## Key engineering decisions
 
@@ -90,7 +143,7 @@ venv/bin/medallion-comments                   # publish them (make refresh also 
 
 **Run a single step**
 
-With `venv` activated, from the repo root: `medallion-schema-drift`, `medallion-describe [--dry-run]`, `medallion-index` or `medallion-chat`.
+With `venv` activated, from the repo root: `medallion-schema-drift`, `medallion-describe [--dry-run]`, `medallion-index`, `medallion-chat` or `medallion-eval`.
 
 If you create your own environment in an iCloud-synced folder on macOS, name it `venv`, not `.venv`. iCloud flags dot-folders as hidden, and recent Python versions skip hidden `.pth` files, which breaks the editable install.
 
