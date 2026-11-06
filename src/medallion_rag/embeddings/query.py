@@ -47,5 +47,5 @@ def retrieve(question: str, top_k: int = 5) -> list[dict[str, str | float]]:
             "description": metadata["description"],
             "distance": distance,
         }
-        for metadata, distance in zip(metadatas, distances)
+        for metadata, distance in zip(metadatas, distances, strict=True)
     ]
