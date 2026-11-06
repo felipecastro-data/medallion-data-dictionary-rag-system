@@ -70,6 +70,16 @@ To check for lakehouse schema drift at any point (e.g. via a scheduled task):
 medallion-schema-drift
 ```
 
+## Development
+
+Tests use mocked clients, so they need no credentials. CI runs both commands on every pull request.
+
+```bash
+pip install -e ".[dev]"
+ruff check .
+pytest
+```
+
 ## Demo
 
 https://github.com/user-attachments/assets/a20f744e-d26a-4bd6-8e98-ba34087eae53
