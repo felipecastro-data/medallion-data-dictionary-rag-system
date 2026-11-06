@@ -8,7 +8,7 @@ changed and points at build_index.py to rebuild the embedding index (it does not
 This is meant to be run manually or via a scheduled task (e.g. cron), not continuously.
 
 Usage:
-    python -m hooks.detect_schema_change
+    medallion-schema-drift
 """
 
 from __future__ import annotations
@@ -19,7 +19,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from mcp_server.db import ALLOWED_TABLES, CATALOG, run_query
+from medallion_rag.mcp_server.db import ALLOWED_TABLES, CATALOG, run_query
 
 SNAPSHOT_PATH = Path(__file__).parent / "schema_snapshot.json"
 
@@ -99,7 +99,7 @@ def run() -> None:
         print(line)
     print()
     print(
-        "The embedding index may now be out of date. Re-run `python -m embeddings.build_index` "
+        "The embedding index may now be out of date. Re-run `medallion-index` "
         "to rebuild it."
     )
 

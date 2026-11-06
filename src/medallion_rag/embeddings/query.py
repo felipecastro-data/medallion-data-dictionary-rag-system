@@ -1,7 +1,7 @@
 """Semantic search over the data_dictionary ChromaDB index built by build_index.py.
 
 Usage:
-    from embeddings.query import retrieve
+    from medallion_rag.embeddings.query import retrieve
     retrieve("what column has customer revenue")
 """
 
@@ -13,7 +13,7 @@ import chromadb
 import voyageai
 from dotenv import load_dotenv
 
-from embeddings.build_index import CHROMA_DB_PATH, COLLECTION_NAME, VOYAGE_MODEL
+from medallion_rag.embeddings.build_index import CHROMA_DB_PATH, COLLECTION_NAME, VOYAGE_MODEL
 
 load_dotenv()
 

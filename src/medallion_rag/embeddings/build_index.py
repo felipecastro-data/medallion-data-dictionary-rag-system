@@ -5,7 +5,7 @@ Reads every data_dictionary row that has a description, embeds a
 the embeddings into a local persistent ChromaDB collection at ./chroma_db.
 
 Usage:
-    python -m embeddings.build_index
+    medallion-index
 """
 
 from __future__ import annotations
@@ -16,7 +16,7 @@ import chromadb
 import voyageai
 from dotenv import load_dotenv
 
-from mcp_server.db import METADATA_TABLE, run_query
+from medallion_rag.mcp_server.db import METADATA_TABLE, run_query
 
 load_dotenv()
 
