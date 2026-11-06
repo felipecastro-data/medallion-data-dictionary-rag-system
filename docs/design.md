@@ -8,8 +8,8 @@ How the system behaves at larger sizes, what it costs, who reviews its output, a
 
 | Run | What's embedded | Time | Voyage cost |
 |---|---|---:|---:|
-| Nothing changed | Nothing | 4.6 s | $0 |
-| Full build, or a changed embedding model | All 80 rows | 7.4 s | $0.00016 |
+| Nothing changed | Nothing | 4.4 s | $0 |
+| Full build, or a changed embedding model | All 80 rows | 8.0 s | $0.00016 |
 
 Lineage isn't embedded, so a lineage change updates stored metadata without a new embedding.
 
@@ -19,7 +19,7 @@ Lineage isn't embedded, so a lineage change updates stored metadata without a ne
 |---|---|---|
 | About 300 columns | Full build on Voyage's free tier | The build sends every changed row in one request. At about 32 tokens per row, that passes the 10,000 tokens a minute allowed. |
 | 1,000 columns | Full build on any tier | [Voyage allows 1,000 texts per request](https://docs.voyageai.com/docs/embeddings), and the code doesn't split requests. |
-| About 22 minutes per 1,000 columns | Generation | Columns are described one at a time at 1.33 s each, before the write for each row. |
+| About 26 minutes per 1,000 columns | Generation | Columns are described one at a time at 1.53 s each, before the write for each row. |
 | 8 tables | Everything | `ALLOWED_TABLES` is a fixed list, so adding a table is a code change. |
 
 **Retrieval may degrade before those limits.** The chatbot uses the top 5 matches. A concept that appears in many places can fill them: "market segment" already takes 4 of the 5. More tables or layers could push the right column out of the top 5, which the fixed question set would show. It wouldn't show a problem with questions it doesn't contain.
@@ -32,12 +32,12 @@ List prices on the measurement date: Claude Haiku 4.5 at $1 per million input to
 
 | Work | Claude tokens (input / output) | Voyage tokens | Cost |
 |---|---:|---:|---:|
-| Generate all 80 descriptions | 37,624 / 3,284 | None | $0.054 |
+| Generate all 80 descriptions | 37,624 / 3,246 | None | $0.054 |
 | Embed all 80 descriptions | None | 2,595 | $0.00016 |
-| **Full dictionary build** | **37,624 / 3,284** | **2,595** | **$0.054** |
-| One question (average of 32) | 543 / 128 | 9 | $0.0012 |
+| **Full dictionary build** | **37,624 / 3,246** | **2,595** | **$0.054** |
+| One question (average of 32) | 692 / 103 | 9 | $0.0012 |
 
-Almost all of a build's cost is generation, and almost all of a question's cost is the answer. Embedding is close to free at this size. As estimates, 1,000 columns would cost about $0.68 to generate, and 1,000 questions about $1.18.
+Almost all of a build's cost is generation, and almost all of a question's cost is the answer. Embedding is close to free at this size. As estimates, 1,000 columns would cost about $0.67 to generate, and 1,000 questions about $1.21.
 
 A guardrail retry adds about one generation call. The measured run had none.
 
@@ -57,7 +57,7 @@ medallion-describe -> source = auto-generated -> medallion-approve -> source = a
 
 **Schema changes.** A change stops `make refresh` until someone accepts it. A dropped column's row is deleted, and its text remains only in the run log and Delta history. See [ADR 0003](adr/0003-manual-schema-hook-vs-auto-rebuild.md).
 
-**Answers.** There's no review of chatbot answers. In the measured run, 10 of 32 added a detail the dictionary doesn't support, so treat answers as a starting point and check their sources.
+**Answers.** There's no review of chatbot answers. In the measured run, 4 of 32 added a detail the dictionary doesn't support, down from 10 before the prompt was tightened, so treat answers as a starting point and check their sources.
 
 ## Security
 

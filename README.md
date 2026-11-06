@@ -29,25 +29,26 @@ Measured on 2026-11-06 with [`medallion-eval`](src/medallion_rag/evaluation/run_
 | Lineage | 5 | 4 | 5 |
 | **Total** | **26** | **22 (85%)** | **26 (100%)** |
 
-**Answer quality.** All 32 answers met their written criterion, including the 5 lineage questions and the 6 questions the dictionary can't answer. However, **10 of the 32 answers also added a detail the dictionary doesn't support**. For example, one answer gave meanings for the order status codes, which the dictionary doesn't define, and another claimed silver has a receipt date column, which it doesn't. This is a known limitation and hasn't been fixed. A reader should check any answer's sources, which the chatbot shows below each reply.
+**Answer quality.** All 32 answers met their written criterion, including the 5 lineage questions and the 6 questions the dictionary can't answer. However, **4 of the 32 answers also added a detail the dictionary doesn't support**, down from 10 before the chatbot's prompt was tightened to state only what the retrieved entries say. For example, one answer says `customers.phone` was validated, which the dictionary doesn't say, and another calls a gold column silver. This is a known limitation, so a reader should check any answer's sources, which the chatbot shows below each reply.
 
 **Time and cost**
 
 | Measure | Result |
 |---|---|
-| Description generation | 106.8 s for 80 columns (1.33 s per column) |
-| Generation cost | $0.054 in total, $0.00068 per column (470 input and 41 output tokens on average) |
-| Full index build | 7.4 s, $0.00016 (2,595 Voyage tokens) |
-| Index re-run with nothing changed | 4.6 s, no embedding cost |
-| Median answer latency | 2.29 s (slowest 3.40 s) |
-| Cost per question | $0.0012 (543 input, 128 output and 9 Voyage tokens on average) |
+| Description generation | 122.7 s for 80 columns (1.53 s per column) |
+| Generation cost | $0.054 in total, $0.00067 per column (470 input and 41 output tokens on average) |
+| Full index build | 8.0 s, $0.00016 (2,595 Voyage tokens) |
+| Index re-run with nothing changed | 4.4 s, no embedding cost |
+| Median answer latency | 1.86 s (slowest 2.69 s) |
+| Cost per question | $0.0012 (692 input, 103 output and 9 Voyage tokens on average) |
 
 **How to read these numbers**
 
 - The question set is small, and its author had read the descriptions first, so scores may run high. It's a regression check, not an estimate of accuracy on new questions.
+- The stricter prompt was written after seeing the earlier errors on these same questions, and both figures come from one run each, so the drop from 10 to 4 may overstate the improvement on new questions. The earlier count would be 11 by the standard used for this run, because one wording that's now counted wasn't counted then. Three of the 4 also appeared in the earlier run, and one is a new error.
 - Answers were graded by Claude Code, the AI assistant that ran the evaluation. The project owner approved the questions and criteria beforehand, but hasn't independently graded the answers.
 - Costs use list prices on the measurement date: Claude Haiku 4.5 at $1 per million input tokens and $5 per million output tokens, and Voyage `voyage-3.5` at $0.06 per million tokens. Any free allowance isn't counted.
-- Generation time covers model calls and sample reads, but not the database write for each row. Row counts come from an earlier check of the tables, not this run.
+- Generation time covers model calls and sample reads, but not the database write for each row. It also includes about 30 seconds of retries after failed Databricks DNS lookups at the start of this run, estimated from the retry log. Row counts come from an earlier check of the tables, not this run.
 - Latency comes from one run on one laptop, with calls spaced 21 seconds apart. On Voyage's free tier of 3 requests a minute, a burst of questions can wait up to about a minute. The chatbot's own rendering time isn't included.
 
 To reproduce these numbers, run `venv/bin/medallion-eval`. It takes about 15 minutes and costs about $0.09. It doesn't change the lakehouse or the local index, but it does overwrite `eval/results.json`, and the answers then need grading again.
@@ -91,7 +92,7 @@ All code lives under [`src/medallion_rag/`](src/medallion_rag):
 
 - **Programmatic guardrail against LLM fabrication.** Prompt wording alone didn't stop the model from inventing plausible-sounding but unevidenced claims — e.g. calling a plain bronze STRING column "encoded" or "hashed" with no such pattern in the sample values. A banned-phrase filter catches this on bronze string columns and triggers one corrective retry with the offending phrase named explicitly. If the retry also fails, nothing is stored: the column stays pending and the run reports a failure. ([`subagents/generate_descriptions.py`](src/medallion_rag/subagents/generate_descriptions.py#L165-L276))
 
-- **Retrieval-aware answer logic, not "newest layer wins."** When the top two ChromaDB matches are near-tied, the chatbot distinguishes *why* they're tied before deciding how to answer: raw-vs-cleaned pairs (bronze/silver) get a "here's both, but use the cleaned one" answer, while a general column tied with a purpose-built Gold aggregate gets "here's both, scoped differently — you decide," since a Gold aggregate isn't simply a more-refined version of the same thing. ([`chatbot/app.py`](src/medallion_rag/chatbot/app.py#L83-L138))
+- **Retrieval-aware answer logic, not "newest layer wins."** When the top two ChromaDB matches are near-tied, the chatbot distinguishes *why* they're tied before deciding how to answer: raw-vs-cleaned pairs (bronze/silver) get a "here's both, but use the cleaned one" answer, while a general column tied with a purpose-built Gold aggregate gets "here's both, scoped differently — you decide," since a Gold aggregate isn't simply a more-refined version of the same thing. ([`chatbot/app.py`](src/medallion_rag/chatbot/app.py#L93-L148))
 
 ## Setup
 

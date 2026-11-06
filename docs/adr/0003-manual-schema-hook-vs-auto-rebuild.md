@@ -22,7 +22,7 @@ Use option 3. It can run on a schedule such as cron, but a schema change always 
 
 ## Trade-offs
 
-**Cost isn't the reason.** A re-run with nothing changed took 4.6 s with no embedding cost. Rebuilding the whole index took 7.4 s and $0.00016, and describing a new column costs about $0.00068. Automatic rebuilds would be affordable.
+**Cost isn't the reason.** A re-run with nothing changed took 4.4 s with no embedding cost. Rebuilding the whole index took 8.0 s and $0.00016, and describing a new column costs about $0.00067. Automatic rebuilds would be affordable.
 
 **Accuracy is the reason.** Syncing is destructive when a column disappears:
 
