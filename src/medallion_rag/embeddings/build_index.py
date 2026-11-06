@@ -1,9 +1,10 @@
 """Build the ChromaDB embedding index for lakehouse_demo.3_gold.data_dictionary.
 
 Reads every data_dictionary row that has a description, embeds a
-"table_name.column_name: description" string for each with Voyage AI, and upserts
-the embeddings into a local persistent ChromaDB collection at ./chroma_db. Refuses to run
-while the schema-drift check has unaccepted changes.
+"table_name.column_name: description" string for each new or changed row with Voyage AI,
+and stores it in a local persistent ChromaDB collection at ./chroma_db. Entries for rows
+that no longer exist are removed. Refuses to run while the schema-drift check has
+unaccepted changes.
 
 Usage:
     medallion-index
@@ -53,36 +54,66 @@ def embed_documents(client: voyageai.Client, texts: list[str]) -> list[list[floa
     return result.embeddings
 
 
+def mark_rows_embedded() -> None:
+    """Record each described row's ChromaDB id in data_dictionary.embedding_id."""
+    run_query(
+        f"""
+        UPDATE {METADATA_TABLE}
+        SET embedding_id = concat(table_name, '.', column_name)
+        WHERE description IS NOT NULL
+          AND embedding_id IS DISTINCT FROM concat(table_name, '.', column_name)
+        """
+    )
+
+
 def run() -> None:
-    """Fetch described rows, embed them, and upsert into the local ChromaDB collection."""
+    """Embed new or changed dictionary rows and remove rows that no longer exist from the index."""
     rows = fetch_described_rows()
     if not rows:
         logger.warning("No rows with a description found in %s.", METADATA_TABLE)
         return
 
-    ids = [f"{row['table_name']}.{row['column_name']}" for row in rows]
-    documents = [
-        build_embedding_input(row["table_name"], row["column_name"], row["description"])
-        for row in rows
-    ]
-    metadatas = [
-        {
-            "table_name": row["table_name"],
-            "column_name": row["column_name"],
-            "description": row["description"],
-        }
-        for row in rows
-    ]
-
-    logger.info("Embedding %d data_dictionary row(s) with %s...", len(documents), VOYAGE_MODEL)
-    voyage_client = voyageai.Client(api_key=os.environ["VOYAGE_API_KEY"])
-    embeddings = embed_documents(voyage_client, documents)
+    rows_by_id = {f"{row['table_name']}.{row['column_name']}": row for row in rows}
+    documents = {
+        entry_id: build_embedding_input(row["table_name"], row["column_name"], row["description"])
+        for entry_id, row in rows_by_id.items()
+    }
 
     chroma_client = chromadb.PersistentClient(path=CHROMA_DB_PATH)
     collection = chroma_client.get_or_create_collection(name=COLLECTION_NAME)
-    collection.upsert(ids=ids, embeddings=embeddings, documents=documents, metadatas=metadatas)
+    existing = collection.get(include=["documents"])
+    indexed = dict(zip(existing["ids"], existing["documents"], strict=True))
 
-    logger.info("Run complete: embedded %d row(s) into '%s'.", len(ids), COLLECTION_NAME)
+    changed_ids = [entry_id for entry_id, document in documents.items() if indexed.get(entry_id) != document]
+    stale_ids = [entry_id for entry_id in indexed if entry_id not in documents]
+
+    if changed_ids:
+        logger.info("Embedding %d new or changed row(s) with %s...", len(changed_ids), VOYAGE_MODEL)
+        voyage_client = voyageai.Client(api_key=os.environ["VOYAGE_API_KEY"])
+        changed_documents = [documents[entry_id] for entry_id in changed_ids]
+        collection.upsert(
+            ids=changed_ids,
+            embeddings=embed_documents(voyage_client, changed_documents),
+            documents=changed_documents,
+            metadatas=[
+                {
+                    "table_name": rows_by_id[entry_id]["table_name"],
+                    "column_name": rows_by_id[entry_id]["column_name"],
+                    "description": rows_by_id[entry_id]["description"],
+                }
+                for entry_id in changed_ids
+            ],
+        )
+    if stale_ids:
+        collection.delete(ids=stale_ids)
+
+    mark_rows_embedded()
+    logger.info(
+        "Run complete: embedded %d row(s), removed %d, left %d unchanged.",
+        len(changed_ids),
+        len(stale_ids),
+        len(documents) - len(changed_ids),
+    )
 
 
 def main() -> int:
