@@ -1,13 +1,13 @@
 """Smoke test: call each MCP tool once against the real Databricks connection.
 
-Not a unit test suite — run directly (`python -m mcp_server.test_server`) to confirm
+Not a unit test suite — run directly (`python -m medallion_rag.mcp_server.test_server`) to confirm
 the server's tools work end to end against the live lakehouse_demo catalog.
 """
 
 from __future__ import annotations
 
-from mcp_server.db import DatabricksConnectionError
-from mcp_server.server import get_sample_rows, get_schema, list_tables, search_metadata
+from medallion_rag.mcp_server.db import DatabricksConnectionError
+from medallion_rag.mcp_server.server import get_sample_rows, get_schema, list_tables, search_metadata
 
 
 def main() -> None:

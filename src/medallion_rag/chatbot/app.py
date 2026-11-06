@@ -4,25 +4,19 @@ Retrieves relevant data_dictionary entries via embeddings.query.retrieve, then a
 the Anthropic API to answer the user's question using those entries as context.
 
 Usage:
-    streamlit run chatbot/app.py
+    medallion-chat
 """
 
 from __future__ import annotations
 
 import os
-import sys
-from pathlib import Path
 
 import streamlit as st
 from anthropic import Anthropic
 from dotenv import load_dotenv
 
-# Streamlit executes this script with only its own directory on sys.path, but
-# embeddings/ and mcp_server/ are sibling packages at the project root.
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-
-from embeddings.query import retrieve  # noqa: E402
-from mcp_server.db import ALLOWED_TABLES  # noqa: E402
+from medallion_rag.embeddings.query import retrieve
+from medallion_rag.mcp_server.db import ALLOWED_TABLES
 
 load_dotenv()
 

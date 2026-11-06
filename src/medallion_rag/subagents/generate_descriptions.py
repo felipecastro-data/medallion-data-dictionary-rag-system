@@ -5,7 +5,7 @@ this gathers schema and sample-value context for that column via the MCP server'
 asks the Anthropic API for a concise business-relevant description, and writes it back.
 
 Usage:
-    python -m subagents.generate_descriptions [--dry-run]
+    medallion-describe [--dry-run]
 
 --dry-run prints the generated descriptions without writing to Databricks, so output
 quality can be reviewed before committing writes.
@@ -21,8 +21,8 @@ from datetime import datetime, timezone
 from anthropic import Anthropic
 from dotenv import load_dotenv
 
-from mcp_server.db import ALLOWED_TABLES, METADATA_TABLE, run_query
-from mcp_server.server import get_sample_rows, get_schema
+from medallion_rag.mcp_server.db import ALLOWED_TABLES, METADATA_TABLE, run_query
+from medallion_rag.mcp_server.server import get_sample_rows, get_schema
 
 load_dotenv()
 

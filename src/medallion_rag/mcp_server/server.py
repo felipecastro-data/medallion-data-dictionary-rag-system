@@ -11,7 +11,7 @@ from typing import Any
 
 from mcp.server.fastmcp import FastMCP
 
-from mcp_server.db import (
+from medallion_rag.mcp_server.db import (
     CATALOG,
     MAX_SAMPLE_ROWS,
     METADATA_TABLE,
