@@ -29,7 +29,8 @@ def retrieve(question: str, top_k: int = 5) -> list[dict[str, str | float]]:
         Records with table_name, column_name, description, derived_from (upstream columns,
         empty if none), and distance (lower is a closer match), ordered by increasing distance.
     """
-    voyage_client = voyageai.Client(api_key=os.environ["VOYAGE_API_KEY"])
+    # Retries wait about a minute in total, enough to outlast the free tier's limit of 3 requests a minute.
+    voyage_client = voyageai.Client(api_key=os.environ["VOYAGE_API_KEY"], max_retries=8)
     query_embedding = voyage_client.embed(
         [question], model=VOYAGE_MODEL, input_type="query"
     ).embeddings[0]
