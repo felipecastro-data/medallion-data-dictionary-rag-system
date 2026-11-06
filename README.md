@@ -24,19 +24,21 @@ flowchart LR
 
 ![Auto-generated data dictionary — 80 columns documented automatically via Claude](docs/data-dictionary-populated.png)
 
-- [`mcp_server/`](mcp_server) — MCP server exposing schema inspection and LIMIT-guarded query tools over the lakehouse.
-- [`subagents/`](subagents) — Reads table/column metadata via MCP, drafts descriptions with Claude, writes them back to `data_dictionary`.
-- [`embeddings/`](embeddings) — Embeds dictionary entries with Voyage AI and indexes them in ChromaDB.
-- [`chatbot/`](chatbot) — Streamlit chat UI; retrieves from ChromaDB and answers via the Anthropic API.
-- [`hooks/`](hooks) — Schema drift detector.
+All code lives under [`src/medallion_rag/`](src/medallion_rag):
+
+- [`mcp_server/`](src/medallion_rag/mcp_server) — MCP server exposing schema inspection and LIMIT-guarded query tools over the lakehouse.
+- [`subagents/`](src/medallion_rag/subagents) — Reads table/column metadata via MCP, drafts descriptions with Claude, writes them back to `data_dictionary`.
+- [`embeddings/`](src/medallion_rag/embeddings) — Embeds dictionary entries with Voyage AI and indexes them in ChromaDB.
+- [`chatbot/`](src/medallion_rag/chatbot) — Streamlit chat UI; retrieves from ChromaDB and answers via the Anthropic API.
+- [`hooks/`](src/medallion_rag/hooks) — Schema drift detector.
 
 ## Key engineering decisions
 
-- **Layer-aware description generation.** Bronze columns are described as raw, as-ingested data — the prompt explicitly forbids asserting uniqueness, primary-key status, or clean joinability that hasn't been established yet at that layer. Silver/Gold columns get relational language (primary key, join key, etc.) once the data has actually been conformed. ([`subagents/generate_descriptions.py`](subagents/generate_descriptions.py#L81-L91))
+- **Layer-aware description generation.** Bronze columns are described as raw, as-ingested data — the prompt explicitly forbids asserting uniqueness, primary-key status, or clean joinability that hasn't been established yet at that layer. Silver/Gold columns get relational language (primary key, join key, etc.) once the data has actually been conformed. ([`subagents/generate_descriptions.py`](src/medallion_rag/subagents/generate_descriptions.py#L81-L91))
 
-- **Programmatic guardrail against LLM fabrication.** Prompt wording alone didn't stop the model from inventing plausible-sounding but unevidenced claims — e.g. calling a plain bronze STRING column "encoded" or "hashed" with no such pattern in the sample values. A banned-phrase filter catches this on bronze string columns and triggers one corrective retry with the offending phrase named explicitly. ([`subagents/generate_descriptions.py`](subagents/generate_descriptions.py#L159-L269))
+- **Programmatic guardrail against LLM fabrication.** Prompt wording alone didn't stop the model from inventing plausible-sounding but unevidenced claims — e.g. calling a plain bronze STRING column "encoded" or "hashed" with no such pattern in the sample values. A banned-phrase filter catches this on bronze string columns and triggers one corrective retry with the offending phrase named explicitly. ([`subagents/generate_descriptions.py`](src/medallion_rag/subagents/generate_descriptions.py#L159-L269))
 
-- **Retrieval-aware answer logic, not "newest layer wins."** When the top two ChromaDB matches are near-tied, the chatbot distinguishes *why* they're tied before deciding how to answer: raw-vs-cleaned pairs (bronze/silver) get a "here's both, but use the cleaned one" answer, while a general column tied with a purpose-built Gold aggregate gets "here's both, scoped differently — you decide," since a Gold aggregate isn't simply a more-refined version of the same thing. ([`chatbot/app.py`](chatbot/app.py#L83-L138))
+- **Retrieval-aware answer logic, not "newest layer wins."** When the top two ChromaDB matches are near-tied, the chatbot distinguishes *why* they're tied before deciding how to answer: raw-vs-cleaned pairs (bronze/silver) get a "here's both, but use the cleaned one" answer, while a general column tied with a purpose-built Gold aggregate gets "here's both, scoped differently — you decide," since a Gold aggregate isn't simply a more-refined version of the same thing. ([`chatbot/app.py`](src/medallion_rag/chatbot/app.py#L77-L132))
 
 ## Setup
 
@@ -48,22 +50,24 @@ flowchart LR
 **Install**
 
 ```bash
-pip install -r requirements.txt
+pip install -e .
 cp .env.example .env   # fill in DATABRICKS_*, ANTHROPIC_API_KEY, VOYAGE_API_KEY
 ```
 
-**Run, in order**
+If the repo sits in an iCloud-synced folder on macOS, name the virtual environment `venv`, not `.venv`. iCloud flags dot-folders as hidden, and recent Python versions skip hidden `.pth` files, which breaks the editable install.
+
+**Run, in order, from the repo root**
 
 ```bash
-python -m subagents.generate_descriptions   # populate data_dictionary descriptions
-python -m embeddings.build_index            # embed + index into ChromaDB
-streamlit run chatbot/app.py                # launch the chatbot
+medallion-describe   # populate data_dictionary descriptions
+medallion-index      # embed + index into ChromaDB
+medallion-chat       # launch the chatbot
 ```
 
 To check for lakehouse schema drift at any point (e.g. via a scheduled task):
 
 ```bash
-python -m hooks.detect_schema_change
+medallion-schema-drift
 ```
 
 ## Demo
@@ -76,6 +80,6 @@ Python · Databricks SQL · MCP (Model Context Protocol) · Anthropic API · Voy
 
 ## Possible extensions
 
-- **Automate the schema-change hook.** [`hooks/detect_schema_change.py`](hooks/detect_schema_change.py) is built and verified end-to-end against real schema changes (column add + drop), but it's intentionally manual/cron-triggered rather than wired to auto-run `build_index.py` — a deliberate scoping choice for this project rather than a limitation of the detection logic itself.
+- **Automate the schema-change hook.** [`hooks/detect_schema_change.py`](src/medallion_rag/hooks/detect_schema_change.py) is built and verified end-to-end against real schema changes (column add + drop), but it's intentionally manual/cron-triggered rather than wired to auto-run `build_index.py` — a deliberate scoping choice for this project rather than a limitation of the detection logic itself.
 - Incremental re-embedding (only changed rows) instead of a full rebuild.
 - Multi-turn conversational memory in the chatbot (currently each question is answered independently of prior turns' retrieval).
