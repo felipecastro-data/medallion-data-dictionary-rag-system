@@ -13,6 +13,7 @@ Claude drafts the dictionary, a person approves it, and a chatbot answers only f
 ![ChromaDB](https://img.shields.io/badge/ChromaDB-vector%20store-6250d6)
 ![MCP](https://img.shields.io/badge/MCP-5%20tools-0b0b0b)
 ![Streamlit](https://img.shields.io/badge/Streamlit-chatbot-FF4B4B?logo=streamlit&logoColor=white)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 [Why](#-why-this-project) · [Architecture](#-architecture) · [Features](#-features) · [Demo](#-see-it-run) ·
 [Results](#-results) · [Decisions](#-architecture-decisions) · [Quickstart](#-quickstart) · [Author](#-author--certifications)
@@ -405,4 +406,4 @@ Senior Data Engineer @ EPAM Systems<br>
 
 ---
 
-The data is the public TPC-H sample from `samples.tpch`, which is generated rather than real business data.
+The data is the public TPC-H sample from `samples.tpch`, which is generated rather than real business data. Licensed [MIT](LICENSE).
