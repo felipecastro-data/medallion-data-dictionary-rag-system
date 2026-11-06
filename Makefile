@@ -6,7 +6,7 @@ INSTALLED := $(BIN)/medallion-index
 
 .PHONY: up refresh
 
-## Install, build the dictionary and index, then launch the chatbot.
+## Install, update the dictionary and the index of approved descriptions, then launch the chatbot.
 up: refresh
 	$(BIN)/medallion-chat
 

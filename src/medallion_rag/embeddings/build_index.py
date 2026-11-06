@@ -1,10 +1,10 @@
 """Build the ChromaDB embedding index for lakehouse_demo.3_gold.data_dictionary.
 
-Reads every data_dictionary row that has a description, embeds a
-"table_name.column_name: description" string for each new or changed row with Voyage AI,
-and stores it in a local persistent ChromaDB collection at ./chroma_db. Entries for rows
-that no longer exist are removed. Refuses to run while the schema-drift check has
-unaccepted changes.
+Reads every approved data_dictionary row, embeds a "table_name.column_name: description"
+string for each new or changed row with Voyage AI, and stores it in a local persistent
+ChromaDB collection at ./chroma_db. Entries for rows that no longer exist or are no longer
+approved are removed, so drafts don't reach the chatbot. Refuses to run while the schema-drift
+check has unaccepted changes.
 
 Usage:
     medallion-index
@@ -21,7 +21,7 @@ from dotenv import load_dotenv
 
 from medallion_rag.hooks.detect_schema_change import run as check_schema_drift
 from medallion_rag.logging_config import configure_logging
-from medallion_rag.mcp_server.db import METADATA_TABLE, run_query
+from medallion_rag.mcp_server.db import APPROVED, METADATA_TABLE, run_query
 from medallion_rag.mcp_server.lineage import fetch_column_lineage
 
 load_dotenv()
@@ -33,15 +33,15 @@ CHROMA_DB_PATH = "./chroma_db"
 COLLECTION_NAME = "data_dictionary"
 
 
-def fetch_described_rows() -> list[dict[str, str]]:
-    """Return data_dictionary rows that have a non-null description."""
+def fetch_approved_rows() -> list[dict[str, str]]:
+    """Return data_dictionary rows whose description a person has approved."""
     query = f"""
         SELECT table_name, column_name, description
         FROM {METADATA_TABLE}
-        WHERE description IS NOT NULL
+        WHERE description IS NOT NULL AND source = :source
         ORDER BY table_name, column_name
     """
-    return run_query(query)
+    return run_query(query, {"source": APPROVED})
 
 
 def build_embedding_input(table_name: str, column_name: str, description: str) -> str:
@@ -56,22 +56,30 @@ def embed_documents(client: voyageai.Client, texts: list[str]) -> list[list[floa
 
 
 def mark_rows_embedded() -> None:
-    """Record each described row's ChromaDB id in data_dictionary.embedding_id."""
+    """Set data_dictionary.embedding_id to the ChromaDB id of indexed rows, and clear it on the rest."""
+    indexed_id = """
+        CASE WHEN description IS NOT NULL AND source = :source
+             THEN concat(table_name, '.', column_name)
+        END
+    """
     run_query(
         f"""
         UPDATE {METADATA_TABLE}
-        SET embedding_id = concat(table_name, '.', column_name)
-        WHERE description IS NOT NULL
-          AND embedding_id IS DISTINCT FROM concat(table_name, '.', column_name)
-        """
+        SET embedding_id = {indexed_id}
+        WHERE embedding_id IS DISTINCT FROM {indexed_id}
+        """,
+        {"source": APPROVED},
     )
 
 
 def run() -> None:
-    """Embed new or changed dictionary rows and remove rows that no longer exist from the index."""
-    rows = fetch_described_rows()
+    """Embed new or changed approved rows and remove entries that no longer qualify from the index."""
+    rows = fetch_approved_rows()
     if not rows:
-        logger.warning("No rows with a description found in %s.", METADATA_TABLE)
+        logger.warning(
+            "No approved rows in %s, so the index wasn't changed. Review drafts with medallion-approve.",
+            METADATA_TABLE,
+        )
         return
 
     lineage = fetch_column_lineage()

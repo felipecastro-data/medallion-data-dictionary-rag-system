@@ -7,7 +7,7 @@ stays in place until the change is accepted, so every later run keeps failing ra
 passing silently.
 
 This is meant to be run manually or via a scheduled task (e.g. cron), not continuously.
-medallion-index also runs this check first.
+medallion-describe and medallion-index also run this check first.
 
 Usage:
     medallion-schema-drift [--accept]

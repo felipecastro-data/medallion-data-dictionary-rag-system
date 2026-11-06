@@ -32,7 +32,7 @@ def voyage(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> MagicMock:
 
 def index(rows: list[dict[str, str]], monkeypatch: pytest.MonkeyPatch) -> None:
     """Run the index build as if data_dictionary currently holds these rows."""
-    monkeypatch.setattr(build_index, "fetch_described_rows", lambda: rows)
+    monkeypatch.setattr(build_index, "fetch_approved_rows", lambda: rows)
     build_index.run()
 
 
@@ -116,3 +116,32 @@ def test_empty_dictionary_leaves_the_index_alone(voyage: MagicMock, monkeypatch:
     index([], monkeypatch)
 
     assert indexed_ids() == ["orders.order_id"]
+
+
+def test_only_approved_rows_are_read_for_the_index(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Drafts must never reach the chatbot, so the read filters on approval."""
+    query = MagicMock(return_value=[])
+    monkeypatch.setattr(build_index, "run_query", query)
+
+    build_index.fetch_approved_rows()
+
+    assert "source = :source" in query.call_args.args[0]
+    assert query.call_args.args[1] == {"source": "approved"}
+
+
+def test_row_returned_to_draft_leaves_the_index(voyage: MagicMock, monkeypatch: pytest.MonkeyPatch) -> None:
+    """A row that stops being approved stops being an answer source on the next run."""
+    index([row("clerk", "Clerk."), row("status", "Order status.")], monkeypatch)
+
+    index([row("status", "Order status.")], monkeypatch)
+
+    assert indexed_ids() == ["orders.status"]
+
+
+def test_embedding_id_is_only_kept_for_approved_rows(voyage: MagicMock) -> None:
+    """embedding_id records what's in the index, so rows outside the index get it cleared."""
+    build_index.mark_rows_embedded()
+
+    statement, parameters = build_index.run_query.call_args.args
+    assert "CASE WHEN description IS NOT NULL AND source = :source" in statement
+    assert parameters == {"source": "approved"}

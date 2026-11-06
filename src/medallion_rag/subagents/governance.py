@@ -2,8 +2,8 @@
 
 A generated description is only a draft until someone approves it, which sets its
 data_dictionary.source to 'approved'. Regenerating a description resets it to 'auto-generated',
-so it needs approving again. Only approved descriptions become column comments, each followed by
-the upstream columns it is derived from.
+so it needs approving again. Only approved descriptions reach the chatbot's index and become
+column comments, each comment followed by the upstream columns it is derived from.
 
 Usage:
     medallion-approve                         list descriptions awaiting approval
@@ -18,13 +18,12 @@ import argparse
 import logging
 
 from medallion_rag.logging_config import configure_logging
-from medallion_rag.mcp_server.db import CATALOG, METADATA_TABLE, run_query
+from medallion_rag.mcp_server.db import APPROVED, CATALOG, METADATA_TABLE, run_query
 from medallion_rag.mcp_server.lineage import fetch_column_lineage
 from medallion_rag.subagents.generate_descriptions import TABLE_TO_SCHEMA
 
 logger = logging.getLogger(__name__)
 
-APPROVED = "approved"
 GENERATED = "auto-generated"
 
 

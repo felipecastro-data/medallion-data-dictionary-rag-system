@@ -28,7 +28,7 @@ as much as working functionality.
   - Pre-populated with `table_name`/`column_name` for all 8 tables; other columns are
     populated by this system.
   - `source` is `auto-generated` until a person approves the description, then `approved`.
-    Only approved descriptions are published as Unity Catalog column comments.
+    Only approved descriptions are indexed for the chatbot and published as Unity Catalog column comments.
 
 ### Building the tables
 
@@ -55,7 +55,7 @@ Databricks (lakehouse_demo)
    Subagent   ---- reads table/column metadata via MCP, drafts descriptions
         |
         v
-  Embeddings  ---- embeds dictionary entries (description text) into ChromaDB
+  Embeddings  ---- embeds approved dictionary entries (description text) into ChromaDB
         |
         v
    Chatbot    ---- Streamlit UI; RAG over ChromaDB, answers via Anthropic API
@@ -67,7 +67,7 @@ Code lives in the installable package `src/medallion_rag/` (`pip install -e .`):
   guarded (LIMIT-enforced) query tools.
 - **`subagents/`** — Agent(s) that use the MCP server to inspect tables/columns and
   generate human-readable descriptions to populate `data_dictionary`.
-- **`embeddings/`** — Embedding pipeline: reads `data_dictionary` rows, generates
+- **`embeddings/`** — Embedding pipeline: reads approved `data_dictionary` rows, generates
   embeddings, stores/indexes them in ChromaDB.
 - **`chatbot/`** — Streamlit chat app; retrieves relevant dictionary entries from
   ChromaDB and answers user questions via the Anthropic API.
