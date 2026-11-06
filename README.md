@@ -43,9 +43,15 @@ All code lives under [`src/medallion_rag/`](src/medallion_rag):
 ## Setup
 
 **Prerequisites**
-- A Databricks workspace with a Medallion lakehouse (this project targets `lakehouse_demo` on Databricks Free Edition — see [`CLAUDE.md`](CLAUDE.md) for the exact schema/table layout)
+- A Databricks workspace with the public `samples.tpch` catalog (this project uses Databricks Free Edition)
 - An [Anthropic API key](https://console.anthropic.com/)
 - A [Voyage AI API key](https://www.voyageai.com/)
+
+**Build the lakehouse**
+
+Open [`sql/build_lakehouse.sql`](sql/build_lakehouse.sql) in the Databricks SQL editor and run the whole file, once. It creates `lakehouse_demo` from `samples.tpch`, copying about 38 million rows; the notebooks it was translated from took about 80 seconds. It replaces any existing tables of the same name.
+
+The file was checked against the live tables with `EXPLAIN` and `DESCRIBE QUERY`, and every table's columns and types match. It hasn't been run from start to finish, because that would replace those tables.
 
 **Run**
 

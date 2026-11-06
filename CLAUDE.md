@@ -30,6 +30,12 @@ as much as working functionality.
   - `source` is `auto-generated` until a person approves the description, then `approved`.
     Only approved descriptions are published as Unity Catalog column comments.
 
+### Building the tables
+
+`sql/build_lakehouse.sql` builds every table from the public `samples.tpch` catalog. It is
+the one exception to the scale caution below: it scans whole tables and replaces them, so
+only a person runs it, on purpose. Validate changes to it with `EXPLAIN` and `DESCRIBE QUERY`.
+
 ### Scale caution
 
 Bronze and Silver tables are TPC-H **production scale**. Every query against
