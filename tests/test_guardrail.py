@@ -75,10 +75,11 @@ def test_guardrail_only_applies_to_bronze_text_columns(schema: str, data_type: s
     assert client.messages.create.call_count == 1
 
 
-def test_retry_happens_once_and_flags_a_repeat_offender(caplog: pytest.LogCaptureFixture) -> None:
-    """A second banned phrase is kept and flagged for review, not retried indefinitely."""
+def test_retry_happens_once_and_rejects_a_repeat_offender() -> None:
+    """A second banned phrase raises, so the text never reaches data_dictionary."""
     client = client_returning(SPECULATIVE, ALSO_SPECULATIVE)
 
-    assert generate(client) == ALSO_SPECULATIVE
+    with pytest.raises(ValueError, match="may capture"):
+        generate(client)
+
     assert client.messages.create.call_count == 2
-    assert "flagging for manual review" in caplog.text
