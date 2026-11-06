@@ -53,17 +53,20 @@ Databricks (lakehouse_demo)
    Chatbot    ---- Streamlit UI; RAG over ChromaDB, answers via Anthropic API
 ```
 
-- **`/mcp_server`** — MCP server exposing Databricks schema inspection and
+Code lives in the installable package `src/medallion_rag/` (`pip install -e .`):
+
+- **`mcp_server/`** — MCP server exposing Databricks schema inspection and
   guarded (LIMIT-enforced) query tools.
-- **`/subagents`** — Agent(s) that use the MCP server to inspect tables/columns and
+- **`subagents/`** — Agent(s) that use the MCP server to inspect tables/columns and
   generate human-readable descriptions to populate `data_dictionary`.
-- **`/embeddings`** — Embedding pipeline: reads `data_dictionary` rows, generates
+- **`embeddings/`** — Embedding pipeline: reads `data_dictionary` rows, generates
   embeddings, stores/indexes them in ChromaDB.
-- **`/chatbot`** — Streamlit chat app; retrieves relevant dictionary entries from
+- **`chatbot/`** — Streamlit chat app; retrieves relevant dictionary entries from
   ChromaDB and answers user questions via the Anthropic API.
-- **`/hooks`** — Automation hooks (e.g., regenerate embeddings when the dictionary
+- **`hooks/`** — Automation hooks (e.g., regenerate embeddings when the dictionary
   changes).
-- **`/docs`** — Supplementary documentation (architecture notes, setup guides).
+
+Supplementary documentation (architecture notes, setup guides) lives in `/docs`.
 
 ## Coding Conventions
 
@@ -78,3 +81,6 @@ Databricks (lakehouse_demo)
 - **Bronze/Silver queries**: always include `LIMIT` — see Scale caution above.
 - **No premature abstraction**: keep modules focused; avoid speculative
   configurability or frameworks beyond what the task requires.
+- **Git**: edit files, including the README, only in the local clone rather than the
+  GitHub web UI. Pulls rebase (`git config pull.rebase true`), and fixups are squashed
+  with `git commit --fixup` plus `git rebase --autosquash` before pushing.
