@@ -10,11 +10,13 @@ INSTALLED := $(BIN)/medallion-index
 up: refresh
 	$(BIN)/medallion-chat
 
-## Check for schema drift, then describe and embed only what changed. Stops at the first failure.
+## Check for schema drift, describe and embed only what changed, then publish approved comments.
+## Stops at the first failure.
 refresh: .env $(INSTALLED)
 	$(BIN)/medallion-schema-drift
 	$(BIN)/medallion-describe
 	$(BIN)/medallion-index
+	$(BIN)/medallion-comments
 
 $(INSTALLED): pyproject.toml requirements.txt
 	$(PYTHON) -m venv $(VENV)

@@ -27,6 +27,8 @@ as much as working functionality.
   - Columns: `table_name`, `column_name`, `description`, `source`, `generated_at`, `embedding_id`
   - Pre-populated with `table_name`/`column_name` for all 8 tables; other columns are
     populated by this system.
+  - `source` is `auto-generated` until a person approves the description, then `approved`.
+    Only approved descriptions are published as Unity Catalog column comments.
 
 ### Scale caution
 
