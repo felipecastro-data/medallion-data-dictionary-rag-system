@@ -1,25 +1,34 @@
-"""Detect schema drift in lakehouse_demo and flag when the embedding index is stale.
+"""Detect schema drift in lakehouse_demo and block re-indexing until it has been reviewed.
 
 Queries information_schema.columns for every tracked table across 1_bronze, 2_silver, and
-3_gold, hashes the resulting table/column/type structure, and compares it against a
-snapshot saved on the previous run. If the structure changed, prints which tables/columns
-changed and points at build_index.py to rebuild the embedding index (it does not run it).
+3_gold, hashes the resulting table/column/type structure, and compares it against a saved
+baseline. If the structure changed, logs which columns changed and exits 1. The baseline
+stays in place until the change is accepted, so every later run keeps failing rather than
+passing silently.
 
 This is meant to be run manually or via a scheduled task (e.g. cron), not continuously.
+medallion-index also runs this check first.
 
 Usage:
-    medallion-schema-drift
+    medallion-schema-drift [--accept]
+
+--accept records the current schema as the new baseline after the changes are reviewed.
 """
 
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
+import logging
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from medallion_rag.logging_config import configure_logging
 from medallion_rag.mcp_server.db import ALLOWED_TABLES, CATALOG, run_query
+
+logger = logging.getLogger(__name__)
 
 SNAPSHOT_PATH = Path(__file__).parent / "schema_snapshot.json"
 
@@ -79,32 +88,46 @@ def diff_columns(old: dict[str, str], new: dict[str, str]) -> list[str]:
     return lines
 
 
-def run() -> None:
-    """Compare the current lakehouse schema against the saved snapshot and report drift."""
+def run(accept: bool = False) -> int:
+    """Compare the current schema against the baseline and return an exit code (1 on unaccepted drift)."""
     current_columns = fetch_current_columns()
     current_hash = hash_columns(current_columns)
     snapshot = load_snapshot()
 
     if snapshot is None:
-        print(f"No snapshot found at {SNAPSHOT_PATH}. Saving current schema as the baseline.")
+        logger.info("No snapshot found at %s. Saving current schema as the baseline.", SNAPSHOT_PATH)
         save_snapshot(current_columns, current_hash)
-        return
+        return 0
 
     if snapshot["hash"] == current_hash:
-        print("No schema changes detected.")
-        return
+        logger.info("No schema changes detected.")
+        return 0
 
-    print("Schema change detected in lakehouse_demo:")
+    logger.warning("Schema change detected in lakehouse_demo:")
     for line in diff_columns(snapshot["columns"], current_columns):
-        print(line)
-    print()
-    print(
-        "The embedding index may now be out of date. Re-run `medallion-index` "
-        "to rebuild it."
-    )
+        logger.warning(line)
 
-    save_snapshot(current_columns, current_hash)
+    if accept:
+        save_snapshot(current_columns, current_hash)
+        logger.info("Accepted the current schema as the new baseline.")
+        return 0
+
+    logger.error("Review these changes, then run `medallion-schema-drift --accept` to continue.")
+    return 1
+
+
+def main() -> int:
+    """CLI entry point."""
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--accept",
+        action="store_true",
+        help="Record the current schema as the new baseline.",
+    )
+    args = parser.parse_args()
+    configure_logging()
+    return run(accept=args.accept)
 
 
 if __name__ == "__main__":
-    run()
+    raise SystemExit(main())
