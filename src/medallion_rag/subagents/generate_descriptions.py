@@ -306,17 +306,25 @@ def sync_dictionary_rows(dry_run: bool) -> None:
     if not current:
         raise RuntimeError("No lakehouse columns found; refusing to sync data_dictionary.")
 
-    rows = run_query(f"SELECT table_name, column_name FROM {METADATA_TABLE}")
+    rows = run_query(f"SELECT table_name, column_name, description FROM {METADATA_TABLE}")
     existing = {
-        (row["table_name"], row["column_name"]) for row in rows if row["table_name"] in TABLE_TO_SCHEMA
+        (row["table_name"], row["column_name"]): row["description"]
+        for row in rows
+        if row["table_name"] in TABLE_TO_SCHEMA
     }
-    to_add = sorted(current - existing)
-    to_delete = sorted(existing - current)
+    to_add = sorted(current - existing.keys())
+    to_delete = sorted(existing.keys() - current)
 
     for table_name, column_name in to_add:
         logger.info("New column: %s.%s", table_name, column_name)
     for table_name, column_name in to_delete:
-        logger.info("Dropped column: %s.%s", table_name, column_name)
+        # The row is deleted below, so the log keeps a copy of text a person may have reviewed.
+        logger.info(
+            "Dropped column: %s.%s (description: %s)",
+            table_name,
+            column_name,
+            existing[(table_name, column_name)],
+        )
 
     if dry_run:
         logger.info("Dry run: would add %d row(s) and delete %d.", len(to_add), len(to_delete))
