@@ -15,7 +15,10 @@ def fake_lakehouse(
     """Fake the schema and dictionary reads, and return the query mock to inspect writes."""
     monkeypatch.setattr(gd, "fetch_current_columns", lambda: dict.fromkeys(columns, "STRING"))
     query = MagicMock(
-        return_value=[{"table_name": table, "column_name": column} for table, column in dictionary]
+        return_value=[
+            {"table_name": table, "column_name": column, "description": f"About {column}."}
+            for table, column in dictionary
+        ]
     )
     monkeypatch.setattr(gd, "run_query", query)
     return query
@@ -40,6 +43,18 @@ def test_new_columns_are_inserted_and_dropped_columns_deleted(monkeypatch: pytes
         ("INSERT", {"table_name": "orders", "column_name": "added"}),
         ("DELETE", {"table_name": "orders", "column_name": "dropped"}),
     ]
+
+
+def test_deleted_description_is_kept_in_the_log(
+    monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+) -> None:
+    """A dropped column takes its description with it, so the log records the text."""
+    fake_lakehouse(monkeypatch, ["2_silver.orders.order_id"], [("orders", "dropped")])
+
+    with caplog.at_level("INFO", logger=gd.__name__):
+        gd.sync_dictionary_rows(dry_run=False)
+
+    assert "orders.dropped (description: About dropped.)" in caplog.text
 
 
 def test_dry_run_writes_nothing(monkeypatch: pytest.MonkeyPatch) -> None:
