@@ -18,6 +18,8 @@ medallion-describe = "medallion_rag.subagents.generate_descriptions:main"
 medallion-index = "medallion_rag.embeddings.build_index:main"
 medallion-chat = "medallion_rag.chatbot.cli:main"
 medallion-schema-drift = "medallion_rag.hooks.detect_schema_change:main"
+medallion-approve = "medallion_rag.subagents.governance:approve_main"
+medallion-comments = "medallion_rag.subagents.governance:comments_main"
 
 [tool.setuptools.dynamic]
 dependencies = { file = ["requirements.txt"] }
