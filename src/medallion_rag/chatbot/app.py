@@ -12,13 +12,16 @@ from __future__ import annotations
 import os
 
 import streamlit as st
+import voyageai
 from anthropic import Anthropic
 from dotenv import load_dotenv
 
 from medallion_rag.embeddings.query import retrieve
+from medallion_rag.logging_config import configure_logging
 from medallion_rag.mcp_server.db import ALLOWED_TABLES
 
 load_dotenv()
+configure_logging()
 
 MODEL = "claude-haiku-4-5-20251001"
 TOP_K = 5
@@ -193,7 +196,11 @@ def main() -> None:
     with st.chat_message("assistant"):
         with st.spinner("Searching the data dictionary..."):
             client = get_anthropic_client()
-            results = retrieve(question, top_k=TOP_K)
+            try:
+                results = retrieve(question, top_k=TOP_K)
+            except voyageai.error.RateLimitError:
+                st.error("The embedding service's rate limit was reached. Wait a minute and ask again.")
+                return
             answer = generate_answer(client, question, results)
         st.markdown(answer)
         render_sources(results)
