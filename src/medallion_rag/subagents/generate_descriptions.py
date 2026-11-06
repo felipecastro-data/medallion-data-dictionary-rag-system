@@ -1,9 +1,9 @@
 """Subagent that populates lakehouse_demo.3_gold.data_dictionary with column descriptions.
 
-First syncs data_dictionary with the lakehouse, adding rows for new columns and deleting rows
-for dropped ones. Then, for each row that has no description yet, this gathers schema and
-sample-value context for that column via the MCP server's tools, asks the Anthropic API for a
-concise business-relevant description, and writes it back.
+Refuses to run while the schema-drift check has unaccepted changes. Then syncs data_dictionary
+with the lakehouse, adding rows for new columns and deleting rows for dropped ones. For each row
+with no description yet, it gathers schema and sample-value context via the MCP server's tools,
+asks the Anthropic API for a concise business-relevant description, and writes it back.
 
 Usage:
     medallion-describe [--dry-run]
@@ -24,6 +24,7 @@ from anthropic import Anthropic
 from dotenv import load_dotenv
 
 from medallion_rag.hooks.detect_schema_change import fetch_current_columns
+from medallion_rag.hooks.detect_schema_change import run as check_schema_drift
 from medallion_rag.logging_config import configure_logging
 from medallion_rag.mcp_server.db import ALLOWED_TABLES, METADATA_TABLE, run_query
 from medallion_rag.mcp_server.server import get_sample_rows, get_schema
@@ -421,6 +422,11 @@ def main() -> int:
     )
     args = parser.parse_args()
     configure_logging()
+    # Syncing deletes the rows of dropped columns, so it waits for a person to accept the change.
+    # A dry run writes nothing, so it can still show what would happen.
+    if not args.dry_run and check_schema_drift() != 0:
+        logger.error("Dictionary not updated because of unaccepted schema changes.")
+        return 1
     return run(dry_run=args.dry_run)
 
 

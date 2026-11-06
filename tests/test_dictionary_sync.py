@@ -99,3 +99,41 @@ def test_failed_description_makes_the_run_exit_nonzero(monkeypatch: pytest.Monke
     monkeypatch.setattr(gd, "generate_description_with_guardrail", failing)
 
     assert gd.run(dry_run=True) == 1
+
+
+def run_cli(
+    monkeypatch: pytest.MonkeyPatch, drift_exit_code: int, *args: str
+) -> tuple[int, MagicMock, MagicMock]:
+    """Run medallion-describe's entry point with fakes, returning its exit code, drift check and run."""
+    drift_check = MagicMock(return_value=drift_exit_code)
+    describe = MagicMock(return_value=0)
+    monkeypatch.setattr(gd, "check_schema_drift", drift_check)
+    monkeypatch.setattr(gd, "run", describe)
+    monkeypatch.setattr(gd, "configure_logging", lambda: None)
+    monkeypatch.setattr("sys.argv", ["medallion-describe", *args])
+    return gd.main(), drift_check, describe
+
+
+def test_unaccepted_schema_change_stops_before_any_row_is_touched(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Syncing deletes dropped columns' rows, so it must wait until the change is accepted."""
+    exit_code, _, describe = run_cli(monkeypatch, 1)
+
+    assert exit_code == 1
+    describe.assert_not_called()
+
+
+def test_accepted_schema_lets_the_run_continue(monkeypatch: pytest.MonkeyPatch) -> None:
+    """With no drift, the command behaves as before."""
+    exit_code, _, describe = run_cli(monkeypatch, 0)
+
+    assert exit_code == 0
+    describe.assert_called_once_with(dry_run=False)
+
+
+def test_dry_run_skips_the_schema_check(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A dry run writes nothing, so it can preview a change that hasn't been accepted yet."""
+    exit_code, drift_check, describe = run_cli(monkeypatch, 1, "--dry-run")
+
+    assert exit_code == 0
+    drift_check.assert_not_called()
+    describe.assert_called_once_with(dry_run=True)

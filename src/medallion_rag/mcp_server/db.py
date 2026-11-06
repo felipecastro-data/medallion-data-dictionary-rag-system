@@ -16,6 +16,7 @@ load_dotenv()
 CATALOG = "lakehouse_demo"
 METADATA_TABLE = f"{CATALOG}.3_gold.data_dictionary"
 MAX_SAMPLE_ROWS = 50
+APPROVED = "approved"  # data_dictionary.source once a person has approved the description.
 
 # The only schemas/tables this project's tools are allowed to touch. Used to validate
 # user-supplied schema/table names before they are interpolated into SQL identifiers

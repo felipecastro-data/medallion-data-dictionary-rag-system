@@ -49,13 +49,13 @@ A guardrail retry adds about one generation call. The measured run had none.
 medallion-describe -> source = auto-generated -> medallion-approve -> source = approved -> medallion-comments
 ```
 
-**What approval controls.** Only approved descriptions become Unity Catalog column comments, each followed by its upstream columns.
+**What approval controls.** Only approved descriptions reach the chatbot's index, and only they become Unity Catalog column comments, each followed by its upstream columns. A new column can't be answered about until someone approves it and the index runs again.
 
-**What approval doesn't control.** `medallion-describe` writes drafts straight into `data_dictionary`, and `medallion-index` embeds every row with a description. So **the chatbot can answer from text nobody has approved, and doesn't tell the reader**. All 80 rows are approved today, so this only applies to future drafts.
+**What approval doesn't control.** `medallion-describe` writes drafts straight into `data_dictionary`, so anyone reading that table sees them, and the MCP dictionary tool returns them with their `source`. An index entry also stays until the next `medallion-index` run, so a row that stops being approved can be answered from until then.
 
 **Why review matters.** 74 of the 80 generated descriptions were corrected after generation, including claims the data didn't support. The project owner approved the first 39 corrections before they were applied. The AI assistant then rewrote 35 more against evidence from the tables and published them, and gave the owner the list to check afterwards. All 80 are marked approved, but that doesn't mean a person read each one before it was published.
 
-**Schema changes.** A change stops `make refresh` until someone accepts it. A dropped column's row is deleted, and its text remains only in the run log and Delta history. See [ADR 0003](adr/0003-manual-schema-hook-vs-auto-rebuild.md).
+**Schema changes.** A change stops `medallion-describe`, `medallion-index` and `make refresh` until someone accepts it. A dropped column's row is deleted, and its text remains only in the run log and Delta history. See [ADR 0003](adr/0003-manual-schema-hook-vs-auto-rebuild.md).
 
 **Answers.** There's no review of chatbot answers. In the measured run, 4 of 32 added a detail the dictionary doesn't support, down from 10 before the prompt was tightened, so treat answers as a starting point and check their sources.
 
