@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import os
+from collections.abc import Iterator
 from contextlib import contextmanager
-from typing import Any, Iterator
+from typing import Any
 
 from databricks import sql
 from databricks.sql.client import Connection
@@ -84,7 +85,7 @@ def run_query(query: str, parameters: dict[str, Any] | None = None) -> list[dict
                 raise DatabricksConnectionError(f"Query failed: {exc}") from exc
 
             columns = [col[0] for col in cursor.description]
-            return [dict(zip(columns, row)) for row in cursor.fetchall()]
+            return [dict(zip(columns, row, strict=True)) for row in cursor.fetchall()]
 
 
 def validate_schema(schema: str) -> None:
