@@ -76,9 +76,7 @@ flowchart LR
 
 ![The medallion lakehouse in Databricks (Unity Catalog, 1_bronze/2_silver/3_gold)](docs/lakehouse-catalog.png)
 
-![The data dictionary as first generated: 80 draft descriptions, source auto-generated, no embedding IDs](docs/data-dictionary-populated.png)
-
-The screenshot above shows the first generated drafts. Since then, 74 of the descriptions have been corrected, and all 80 rows are approved and indexed.
+![The data dictionary in Databricks: 80 approved descriptions, each with an embedding ID](docs/data-dictionary-populated.png)
 
 All code lives under [`src/medallion_rag/`](src/medallion_rag):
 
