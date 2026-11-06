@@ -45,7 +45,7 @@ TABLE_TO_SCHEMA: dict[str, str] = {
 
 SYSTEM_PROMPT = (
     "You are a data-dictionary assistant for a Medallion Architecture (Bronze/Silver/Gold) "
-    "e-commerce lakehouse. Answer the user's question using ONLY the retrieved data "
+    "lakehouse built from TPC-H sample data. Answer the user's question using ONLY the retrieved data "
     "dictionary entries given as context. Always reference the exact table_name.column_name "
     "for anything you mention. If the context doesn't contain a clear answer, say so instead "
     "of guessing.\n\n"

@@ -109,7 +109,7 @@ def build_prompt(
     )
     return (
         "You are writing a data dictionary entry for a column in a lakehouse table.\n\n"
-        f"Table: {table_name} (schema: {schema}, part of an e-commerce lakehouse)\n"
+        f"Table: {table_name} (schema: {schema}, part of a lakehouse built from TPC-H sample data)\n"
         f"Column: {column_name}\n"
         f"Data type: {data_type}\n"
         f"Sample values: {samples}\n\n"
